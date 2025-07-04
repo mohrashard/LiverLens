@@ -216,7 +216,6 @@ def login():
             {'$set': {'last_login': datetime.utcnow()}}
         )
         
-        # Prepare response
         response_data = {
             'success': True,
             'message': 'Login successful',
@@ -224,11 +223,12 @@ def login():
                 'id': str(user['_id']),
                 'full_name': user['full_name'],
                 'email': user['email'],
-                'role': user['role']
+                'role': user['role'],
+                'created_at': user.get('created_at').isoformat() if user.get('created_at') else None,
+                'last_login': user.get('last_login').isoformat() if user.get('last_login') else None
             }
         }
         
-        # Add role-specific info
         if user['role'] == 'Doctor' and 'doctor_info' in user:
             response_data['user']['doctor_info'] = user['doctor_info']
         elif user['role'] in ['Researcher', 'Student'] and 'academic_info' in user:
@@ -259,7 +259,7 @@ def get_profile():
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
-        # Prepare response
+      
         profile_data = {
             'id': str(user['_id']),
             'full_name': user['full_name'],
