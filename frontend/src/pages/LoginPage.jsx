@@ -48,7 +48,7 @@ const LoginPage = () => {
     }
   };
 
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -62,7 +62,7 @@ const handleSubmit = async () => {
           type: 'success', 
           text: 'Login successful! Redirecting to dashboard...' 
         });
-        setTimeout(() => navigate('/DashboardPage'), 1500);
+        setTimeout(() => navigate('/dashboard'), 1500); // Updated to '/dashboard'
       } else {
         setMessage({ 
           type: 'error', 
@@ -78,7 +78,6 @@ const handleSubmit = async () => {
       setIsLoading(false);
     }
   };
-
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') handleSubmit();

@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  Home, 
-  Activity, 
-  History, 
-  User, 
-  LogOut, 
-  Upload, 
-  FilePlus, 
-  Gamepad2, 
-  BookOpen, 
-  FolderSearch, 
+import { Link } from 'react-router-dom';
+import {
+  Home,
+  Activity,
+  History,
+  User,
+  LogOut,
+  Upload,
+  FilePlus,
+  Gamepad2,
+  BookOpen,
+  FolderSearch,
   BarChart,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 
 const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
@@ -71,7 +72,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
   return (
     <>
       {/* Mobile Menu Toggle Button */}
-      <button 
+      <button
         className="mobile-menu-toggle"
         onClick={toggleMobileMenu}
         aria-label="Toggle mobile menu"
@@ -81,14 +82,18 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="mobile-overlay"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <nav className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+      <nav
+        className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${
+          isMobileMenuOpen ? 'mobile-open' : ''
+        }`}
+      >
         {/* Logo Section */}
         <div className="sidebar-logo">
           <img
@@ -96,13 +101,11 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
             alt="LiverLens Logo"
             className="logo-img"
           />
-          {!isCollapsed && (
-            <h2 className="logo-text">LiverLens</h2>
-          )}
+          {!isCollapsed && <h2 className="logo-text">LiverLens</h2>}
         </div>
 
         {/* Desktop Collapse Toggle */}
-        <button 
+        <button
           className="collapse-toggle desktop-only"
           onClick={toggleCollapse}
           aria-label="Toggle sidebar"
@@ -128,8 +131,8 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
             const IconComponent = item.icon;
             return (
               <li key={index} className="nav-item">
-                <a 
-                  href={item.route}
+                <Link
+                  to={item.route}
                   className="nav-link"
                   onClick={handleNavClick}
                   title={isCollapsed ? item.label : ''}
@@ -138,7 +141,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
                   {!isCollapsed && (
                     <span className="nav-label">{item.label}</span>
                   )}
-                </a>
+                </Link>
               </li>
             );
           })}
@@ -146,15 +149,13 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
 
         {/* Logout Button */}
         <div className="sidebar-footer">
-          <button 
+          <button
             className="logout-btn"
             onClick={handleLogout}
             title={isCollapsed ? 'Logout' : ''}
           >
             <LogOut size={20} className="nav-icon" />
-            {!isCollapsed && (
-              <span className="nav-label">Logout</span>
-            )}
+            {!isCollapsed && <span className="nav-label">Logout</span>}
           </button>
         </div>
       </nav>
@@ -183,7 +184,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
 
         .mobile-overlay {
           display: none;
-          position: fixed;
+          position: fixedGabri; fixed;
           top: 0;
           left: 0;
           right: 0;
