@@ -3,28 +3,42 @@ import Sidebar from '../components/sidebar';
 import { useAuth } from '../auth';
 import { Navigate } from 'react-router-dom';
 import { 
-  Home, 
   Activity, 
-  History, 
-  User, 
-  LogOut, 
-  Upload, 
-  FilePlus, 
-  Gamepad2, 
-  BookOpen, 
-  FolderSearch, 
-  BarChart,
-  Menu,
-  X,
+  Loader, 
+  Heart, 
+  Info,
   AlertCircle,
-  CheckCircle,
-  Loader,
-  Heart,
-  Info
+  CheckCircle
 } from 'lucide-react';
+import '../styles/predict.css';
+
+const fieldDescriptions = {
+  Patient_Name: 'The full name of the patient.',
+  Patient_ID: 'A unique identifier for the patient.',
+  N_Days: 'Select the date when the patient was enrolled in the study. The number of days will be calculated automatically based on today\'s date.',
+  Drug: 'The type of drug given to the patient (D-penicillamine or Placebo).',
+  Age: 'The patient’s age in years.',
+  Sex: 'The patient’s sex (Male or Female).',
+  Ascites: 'Whether there’s fluid buildup in the abdomen (Yes or No).',
+  Hepatomegaly: 'Whether the liver is enlarged (Yes or No).',
+  Spiders: 'Whether there are spider-like blood vessels on the skin (Yes or No).',
+  Edema: 'Swelling due to fluid in the body’s tissues (No, Slight, or Yes).',
+  Bilirubin: 'Level of bilirubin in the blood (mg/dl), related to liver function.',
+  Cholesterol: 'Level of cholesterol in the blood (mg/dl).',
+  Albumin: 'Level of albumin protein in the blood (gm/dl), indicates liver health.',
+  Copper: 'Level of copper in the urine (μg/day), can signal liver issues.',
+  Alk_Phos: 'Level of alkaline phosphatase in the blood (U/liter), a liver enzyme.',
+  SGOT: 'Level of SGOT enzyme in the blood (U/ml), measures liver damage.',
+  Tryglicerides: 'Level of triglycerides in the blood (mg/dl), a type of fat.',
+  Platelets: 'Platelet count in the blood (cubic ml/1000), affects clotting.',
+  Prothrombin: 'Time for blood to clot (seconds), linked to liver function.',
+  Stage: 'The stage of liver disease (1 to 4), higher means more severe.',
+};
 
 const PredictPage = () => {
   const [formData, setFormData] = useState({
+    Patient_Name: '',
+    Patient_ID: '',
     N_Days: '',
     Drug: '',
     Age: '',
@@ -42,9 +56,11 @@ const PredictPage = () => {
     Tryglicerides: '',
     Platelets: '',
     Prothrombin: '',
-    Stage: ''
+    Stage: '',
   });
   
+  const [selectedDate, setSelectedDate] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState('');
@@ -70,7 +86,7 @@ const PredictPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -86,20 +102,20 @@ const PredictPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include cookies for session authentication
-        body: JSON.stringify(formData)
+        credentials: 'include',
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Server response:', data); // Log detailed error
+        console.error('Server response:', data);
         throw new Error(data.error || `Prediction failed with status ${response.status}`);
       }
 
       setPrediction(data);
     } catch (error) {
-      console.error('Fetch error:', error); // Log fetch errors
+      console.error('Fetch error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -108,6 +124,8 @@ const PredictPage = () => {
 
   const resetForm = () => {
     setFormData({
+      Patient_Name: '',
+      Patient_ID: '',
       N_Days: '',
       Drug: '',
       Age: '',
@@ -125,10 +143,140 @@ const PredictPage = () => {
       Tryglicerides: '',
       Platelets: '',
       Prothrombin: '',
-      Stage: ''
+      Stage: '',
     });
+    setSelectedDate('');
     setPrediction(null);
     setError('');
+    setCurrentSlide(0);
+  };
+
+  const slides = [
+    {
+      title: 'Patient Information',
+      fields: ['Patient_Name', 'Patient_ID', 'N_Days', 'Drug', 'Age', 'Sex'],
+    },
+    {
+      title: 'Clinical Signs',
+      fields: ['Ascites', 'Hepatomegaly', 'Spiders', 'Edema'],
+    },
+    {
+      title: 'Laboratory Results',
+      fields: [
+        'Bilirubin', 'Cholesterol', 'Albumin', 'Copper', 'Alk_Phos', 'SGOT',
+        'Tryglicerides', 'Platelets', 'Prothrombin', 'Stage',
+      ],
+    },
+  ];
+
+  const handleNextSlide = () => {
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    }
+  };
+
+  const handlePrevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    }
+  };
+
+  const renderField = (field) => {
+    const commonProps = {
+      name: field,
+      value: formData[field],
+      onChange: handleInputChange,
+      required: true,
+    };
+
+    switch (field) {
+      case 'Patient_Name':
+      case 'Patient_ID':
+        return (
+          <input
+            type="text"
+            {...commonProps}
+            placeholder={`Enter ${field.replace('_', ' ')}`}
+          />
+        );
+      case 'N_Days':
+        return (
+          <div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                if (e.target.value) {
+                  const today = new Date();
+                  const selected = new Date(e.target.value);
+                  const days = Math.floor((today - selected) / (1000 * 60 * 60 * 24));
+                  setFormData(prev => ({ ...prev, N_Days: days.toString() }));
+                } else {
+                  setFormData(prev => ({ ...prev, N_Days: '' }));
+                }
+              }}
+              required
+            />
+            {formData.N_Days && <p>Days since enrollment: {formData.N_Days}</p>}
+          </div>
+        );
+      case 'Drug':
+        return (
+          <select {...commonProps}>
+            <option value="">Select Drug</option>
+            <option value="D-penicillamine">D-penicillamine</option>
+            <option value="Placebo">Placebo</option>
+          </select>
+        );
+      case 'Sex':
+        return (
+          <select {...commonProps}>
+            <option value="">Select Sex</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        );
+      case 'Ascites':
+      case 'Hepatomegaly':
+      case 'Spiders':
+        return (
+          <select {...commonProps}>
+            <option value="">Select</option>
+            <option value="N">No</option>
+            <option value="Y">Yes</option>
+          </select>
+        );
+      case 'Edema':
+        return (
+          <select {...commonProps}>
+            <option value="">Select</option>
+            <option value="N">No</option>
+            <option value="S">Slight</option>
+            <option value="Y">Yes</option>
+          </select>
+        );
+      case 'Stage':
+        return (
+          <select {...commonProps}>
+            <option value="">Select Stage</option>
+            <option value="1">Stage 1</option>
+            <option value="2">Stage 2</option>
+            <option value="3">Stage 3</option>
+            <option value="4">Stage 4</option>
+          </select>
+        );
+      default:
+        return (
+          <input
+            type="number"
+            step="0.1"
+            min="0"
+            {...commonProps}
+            placeholder={`Enter ${field.replace('_', ' ')}`}
+          />
+        );
+    }
   };
 
   return (
@@ -154,295 +302,46 @@ const PredictPage = () => {
 
           <div className="predict-form-container">
             <form onSubmit={handleSubmit} className="predict-form">
-              <div className="form-sections">
-                <div className="form-section">
-                  <h3>Patient Information</h3>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="Age">Age (years)</label>
-                      <input
-                        type="number"
-                        id="Age"
-                        name="Age"
-                        value={formData.Age}
-                        onChange={handleInputChange}
-                        placeholder="Enter age"
-                        min="0"
-                        max="150"
-                        required
-                      />
+              <div className="form-section">
+                <h3>{slides[currentSlide].title}</h3>
+                <div className="form-grid">
+                  {slides[currentSlide].fields.map((field) => (
+                    <div key={field} className="form-group">
+                      <label htmlFor={field}>{field.replace('_', ' ')}</label>
+                      <p className="field-description">{fieldDescriptions[field]}</p>
+                      {renderField(field)}
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="Sex">Sex</label>
-                      <select
-                        id="Sex"
-                        name="Sex"
-                        value={formData.Sex}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Sex</option>
-                        <option value="M">Male</option>
-                        <option value="F">Female</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="N_Days">N Days</label>
-                      <input
-                        type="number"
-                        id="N_Days"
-                        name="N_Days"
-                        value={formData.N_Days}
-                        onChange={handleInputChange}
-                        placeholder="Number of days"
-                        min="0"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Drug">Drug</label>
-                      <select
-                        id="Drug"
-                        name="Drug"
-                        value={formData.Drug}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Drug</option>
-                        <option value="D-penicillamine">D-penicillamine</option>
-                        <option value="Placebo">Placebo</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h3>Clinical Signs</h3>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="Ascites">Ascites</label>
-                      <select
-                        id="Ascites"
-                        name="Ascites"
-                        value={formData.Ascites}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select</option>
-                        <option value="N">No</option>
-                        <option value="Y">Yes</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Hepatomegaly">Hepatomegaly</label>
-                      <select
-                        id="Hepatomegaly"
-                        name="Hepatomegaly"
-                        value={formData.Hepatomegaly}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select</option>
-                        <option value="N">No</option>
-                        <option value="Y">Yes</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Spiders">Spiders</label>
-                      <select
-                        id="Spiders"
-                        name="Spiders"
-                        value={formData.Spiders}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select</option>
-                        <option value="N">No</option>
-                        <option value="Y">Yes</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Edema">Edema</label>
-                      <select
-                        id="Edema"
-                        name="Edema"
-                        value={formData.Edema}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select</option>
-                        <option value="N">No</option>
-                        <option value="S">Slight</option>
-                        <option value="Y">Yes</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-section">
-                  <h3>Laboratory Results</h3>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="Bilirubin">Bilirubin (mg/dl)</label>
-                      <input
-                        type="number"
-                        id="Bilirubin"
-                        name="Bilirubin"
-                        value={formData.Bilirubin}
-                        onChange={handleInputChange}
-                        placeholder="Enter bilirubin level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Cholesterol">Cholesterol (mg/dl)</label>
-                      <input
-                        type="number"
-                        id="Cholesterol"
-                        name="Cholesterol"
-                        value={formData.Cholesterol}
-                        onChange={handleInputChange}
-                        placeholder="Enter cholesterol level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Albumin">Albumin (gm/dl)</label>
-                      <input
-                        type="number"
-                        id="Albumin"
-                        name="Albumin"
-                        value={formData.Albumin}
-                        onChange={handleInputChange}
-                        placeholder="Enter albumin level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Copper">Copper (μg/day)</label>
-                      <input
-                        type="number"
-                        id="Copper"
-                        name="Copper"
-                        value={formData.Copper}
-                        onChange={handleInputChange}
-                        placeholder="Enter copper level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Alk_Phos">Alkaline Phosphatase (U/liter)</label>
-                      <input
-                        type="number"
-                        id="Alk_Phos"
-                        name="Alk_Phos"
-                        value={formData.Alk_Phos}
-                        onChange={handleInputChange}
-                        placeholder="Enter alkaline phosphatase"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="SGOT">SGOT (U/ml)</label>
-                      <input
-                        type="number"
-                        id="SGOT"
-                        name="SGOT"
-                        value={formData.SGOT}
-                        onChange={handleInputChange}
-                        placeholder="Enter SGOT level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Tryglicerides">Triglycerides (mg/dl)</label>
-                      <input
-                        type="number"
-                        id="Tryglicerides"
-                        name="Tryglicerides"
-                        value={formData.Tryglicerides}
-                        onChange={handleInputChange}
-                        placeholder="Enter triglycerides level"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Platelets">Platelets (cubic ml/1000)</label>
-                      <input
-                        type="number"
-                        id="Platelets"
-                        name="Platelets"
-                        value={formData.Platelets}
-                        onChange={handleInputChange}
-                        placeholder="Enter platelets count"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Prothrombin">Prothrombin Time (s)</label>
-                      <input
-                        type="number"
-                        id="Prothrombin"
-                        name="Prothrombin"
-                        value={formData.Prothrombin}
-                        onChange={handleInputChange}
-                        placeholder="Enter prothrombin time"
-                        step="0.1"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="Stage">Stage</label>
-                      <select
-                        id="Stage"
-                        name="Stage"
-                        value={formData.Stage}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Stage</option>
-                        <option value="1">Stage 1</option>
-                        <option value="2">Stage 2</option>
-                        <option value="3">Stage 3</option>
-                        <option value="4">Stage 4</option>
-                      </select>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               <div className="form-actions">
+                {currentSlide > 0 && (
+                  <button type="button" onClick={handlePrevSlide} className="btn-secondary">
+                    Previous
+                  </button>
+                )}
+                {currentSlide < slides.length - 1 ? (
+                  <button type="button" onClick={handleNextSlide} className="btn-primary">
+                    Next
+                  </button>
+                ) : (
+                  <button type="submit" disabled={loading} className="btn-primary">
+                    {loading ? (
+                      <>
+                        <Loader className="btn-icon spinning" />
+                        Predicting...
+                      </>
+                    ) : (
+                      <>
+                        <Activity className="btn-icon" />
+                        Predict
+                      </>
+                    )}
+                  </button>
+                )}
                 <button type="button" onClick={resetForm} className="btn-secondary">
                   Reset Form
-                </button>
-                <button type="submit" disabled={loading} className="btn-primary">
-                  {loading ? (
-                    <>
-                      <Loader className="btn-icon spinning" />
-                      Predicting...
-                    </>
-                  ) : (
-                    <>
-                      <Activity className="btn-icon" />
-                      Predict
-                    </>
-                  )}
                 </button>
               </div>
             </form>
@@ -497,6 +396,17 @@ const PredictPage = () => {
                   </div>
                 </div>
                 
+                <div className="recommendation">
+                  <h4>Recommendation</h4>
+                  <p>
+                    {prediction.predicted_status === 'D'
+                      ? 'Immediate medical attention is required. Please consult your healthcare provider as soon as possible.'
+                      : prediction.predicted_status === 'CL'
+                      ? 'The condition is being managed, but regular check-ups are recommended.'
+                      : 'The liver is functioning adequately. Maintain a healthy lifestyle and regular check-ups.'}
+                  </p>
+                </div>
+                
                 <div className="disclaimer">
                   <Info className="disclaimer-icon" />
                   <p>{prediction.disclaimer}</p>
@@ -506,660 +416,6 @@ const PredictPage = () => {
           )}
         </div>
       </main>
-
-      <style jsx>{`
-        .app-container {
-          display: flex;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-          width: 280px;
-          background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-          color: white;
-          position: fixed;
-          height: 100vh;
-          left: 0;
-          top: 0;
-          overflow-y: auto;
-          transition: all 0.3s ease;
-          z-index: 1000;
-          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar.collapsed {
-          width: 80px;
-        }
-
-        .sidebar-logo {
-          display: flex;
-          align-items: center;
-          padding: 20px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo-img {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
-          background: white;
-          padding: 4px;
-        }
-
-        .logo-text {
-          margin-left: 12px;
-          font-size: 22px;
-          font-weight: 700;
-          color: white;
-        }
-
-        .collapse-toggle {
-          position: absolute;
-          right: 15px;
-          top: 25px;
-          background: rgba(255, 255, 255, 0.1);
-          border: none;
-          color: white;
-          border-radius: 6px;
-          padding: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .collapse-toggle:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-
-        .user-info {
-          display: flex;
-          align-items: center;
-          padding: 20px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .user-details {
-          margin-left: 12px;
-        }
-
-        .user-role {
-          font-size: 14px;
-          color: #bdc3c7;
-        }
-
-        .nav-items {
-          list-style: none;
-          padding: 0;
-          margin: 20px 0;
-        }
-
-        .nav-item {
-          margin-bottom: 4px;
-        }
-
-        .nav-link {
-          display: flex;
-          align-items: center;
-          padding: 12px 20px;
-          color: white;
-          text-decoration: none;
-          transition: all 0.2s;
-          border-radius: 0 25px 25px 0;
-          margin-right: 15px;
-        }
-
-        .nav-link:hover {
-          background: rgba(255, 255, 255, 0.1);
-          transform: translateX(5px);
-        }
-
-        .nav-link.active {
-          background: rgba(255, 255, 255, 0.2);
-          border-right: 3px solid #3498db;
-        }
-
-        .nav-icon {
-          margin-right: 12px;
-        }
-
-        .nav-label {
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .sidebar-footer {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          padding: 20px;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logout-btn {
-          display: flex;
-          align-items: center;
-          width: 100%;
-          padding: 12px 20px;
-          background: rgba(231, 76, 60, 0.1);
-          color: #e74c3c;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .logout-btn:hover {
-          background: rgba(231, 76, 60, 0.2);
-        }
-
-        .mobile-menu-toggle {
-          display: none;
-          position: fixed;
-          top: 20px;
-          left: 20px;
-          z-index: 1100;
-          background: rgba(255, 255, 255, 0.9);
-          border: none;
-          border-radius: 8px;
-          padding: 10px;
-          cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .mobile-overlay {
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 999;
-        }
-
-        .desktop-only {
-          display: block;
-        }
-
-        @media (max-width: 768px) {
-          .sidebar {
-            transform: translateX(-100%);
-          }
-          
-          .sidebar.mobile-open {
-            transform: translateX(0);
-          }
-          
-          .mobile-menu-toggle {
-            display: block;
-          }
-          
-          .mobile-overlay {
-            display: block;
-          }
-          
-          .desktop-only {
-            display: none;
-          }
-        }
-
-        /* Main Content Styles */
-        .main-content {
-          flex: 1;
-          margin-left: 280px;
-          padding: 0;
-          transition: margin-left 0.3s ease;
-        }
-
-        .sidebar.collapsed ~ .main-content {
-          margin-left: 80px;
-        }
-
-        @media (max-width: 768px) {
-          .main-content {
-            margin-left: 0;
-            padding-top: 70px;
-          }
-        }
-
-        .predict-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 40px 20px;
-        }
-
-        .predict-header {
-          text-align: center;
-          margin-bottom: 40px;
-        }
-
-        .header-content {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          margin-bottom: 10px;
-        }
-
-        .header-icon {
-          width: 48px;
-          height: 48px;
-          color: #fff;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .predict-header h1 {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: white;
-          margin: 0;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .predict-header p {
-          font-size: 1.1rem;
-          color: rgba(255, 255, 255, 0.9);
-          margin: 0;
-        }
-
-        .predict-form-container {
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-          margin-bottom: 30px;
-        }
-
-        .predict-form {
-          padding: 40px;
-        }
-
-        .form-sections {
-          display: flex;
-          flex-direction: column;
-          gap: 40px;
-        }
-
-        .form-section {
-          border-bottom: 1px solid #e5e7eb;
-          padding-bottom: 30px;
-        }
-
-        .form-section:last-child {
-          border-bottom: none;
-          padding-bottom: 0;
-        }
-
-        .form-section h3 {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .form-section h3::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          border-radius: 2px;
-        }
-
-        .form-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 20px;
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .form-group label {
-          font-weight: 500;
-          color: #374151;
-          margin-bottom: 8px;
-          font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group select {
-          padding: 12px 16px;
-          border: 2px solid #e5e7eb;
-          border-radius: 8px;
-          font-size: 1rem;
-          transition: all 0.2s;
-          background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-          outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group input::placeholder {
-          color: #9ca3af;
-        }
-
-        .form-actions {
-          display: flex;
-          gap: 16px;
-          justify-content: flex-end;
-          margin-top: 40px;
-          padding-top: 30px;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .btn-primary,
-        .btn-secondary {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-weight: 500;
-          font-size: 1rem;
-          cursor: pointer;
-          transition: all 0.2s;
-          border: none;
-          min-width: 120px;
-          justify-content: center;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .btn-secondary {
-          background: white;
-          color: #6b7280;
-          border: 2px solid #e5e7eb;
-        }
-
-        .btn-secondary:hover {
-          background: #f9fafb;
-          border-color: #d1d5db;
-        }
-
-        .btn-icon {
-          width: 20px;
-          height: 20px;
-        }
-
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .alert {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 16px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-        }
-
-        .alert-error {
-          background: #fef2f2;
-          color: #dc2626;
-          border: 1px solid #fecaca;
-        }
-
-        .alert-icon {
-          width: 20px;
-          height: 20px;
-          margin-top: 2px;
-        }
-
-        .prediction-results {
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-          margin-top: 30px;
-        }
-
-        .result-header {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: white;
-          padding: 20px 40px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .result-icon {
-          width: 28px;
-          height: 28px;
-        }
-
-        .result-header h3 {
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin: 0;
-        }
-
-        .result-content {
-          padding: 40px;
-        }
-
-        .result-main {
-          margin-bottom: 30px;
-        }
-
-        .status-display {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .status-badge {
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-weight: 600;
-          font-size: 1.1rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .status-badge.low {
-          background: #d1fae5;
-          color: #065f46;
-        }
-
-        .status-badge.medium {
-          background: #fef3c7;
-          color: #92400e;
-        }
-
-        .status-badge.high {
-          background: #fee2e2;
-          color: #991b1b;
-        }
-
-        .status-description {
-          flex: 1;
-        }
-
-        .status-description p {
-          margin: 0 0 8px 0;
-          color: #374151;
-          font-size: 1rem;
-        }
-
-        .risk-level {
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        .probabilities {
-          margin-bottom: 30px;
-        }
-
-        .probabilities h4 {
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 16px;
-        }
-
-        .prob-bars {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .prob-bar {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .prob-label {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.9rem;
-          color: #6b7280;
-          font-weight: 500;
-        }
-
-        .prob-track {
-          height: 8px;
-          background: #e5e7eb;
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .prob-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #667eea, #764ba2);
-          border-radius: 4px;
-          transition: width 0.8s ease;
-        }
-
-        .disclaimer {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 16px;
-          background: #fffbeb;
-          border: 1px solid #fcd34d;
-          border-radius: 8px;
-          color: #92400e;
-        }
-
-        .disclaimer-icon {
-          width: 20px;
-          height: 20px;
-          margin-top: 2px;
-        }
-
-        .disclaimer p {
-          margin: 0;
-          font-size: 0.9rem;
-        }
-
-        .loading-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100vh;
-          color: white;
-          text-align: center;
-        }
-
-        .loading-spinner {
-          width: 40px;
-          height: 40px;
-          margin-bottom: 16px;
-          animation: spin 1s linear infinite;
-        }
-
-        @media (max-width: 768px) {
-          .predict-container {
-            padding: 20px 15px;
-          }
-
-          .predict-form {
-            padding: 30px 20px;
-          }
-
-          .form-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .form-actions {
-            flex-direction: column;
-          }
-
-          .status-display {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-          }
-
-          .result-content {
-            padding: 30px 20px;
-          }
-
-          .predict-header h1 {
-            font-size: 2rem;
-          }
-
-          .header-content {
-            flex-direction: column;
-            gap: 12px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .predict-header h1 {
-            font-size: 1.8rem;
-          }
-
-          .form-section h3 {
-            font-size: 1.3rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };

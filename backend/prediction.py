@@ -76,29 +76,40 @@ def login_required(f):
 
 def validate_input_data(data):
     required_fields = [
+        'Patient_Name', 'Patient_ID',
         'N_Days', 'Drug', 'Age', 'Sex', 'Ascites', 'Hepatomegaly', 
         'Spiders', 'Edema', 'Bilirubin', 'Cholesterol', 'Albumin', 
         'Copper', 'Alk_Phos', 'SGOT', 'Tryglicerides', 'Platelets', 
         'Prothrombin', 'Stage'
     ]
+    
     missing_fields = [field for field in required_fields if field not in data]
     if missing_fields:
         return False, f"Missing required fields: {', '.join(missing_fields)}"
+    
+    if not data['Patient_Name']:
+        return False, "Patient Name is required"
+    if not data['Patient_ID']:
+        return False, "Patient ID is required"
+    
     try:
         age = float(data['Age']) if data['Age'] not in [None, '', 'null'] else None
         if age is not None and (age <= 0 or age > 150):
             return False, "Age must be between 0 and 150 years"
     except (ValueError, TypeError):
         return False, "Age must be a valid number"
+    
     if data['Sex'] not in [None, '', 'null']:
         if str(data['Sex']).upper() not in ['M', 'F', 'MALE', 'FEMALE']:
             return False, "Sex must be 'M', 'F', 'Male', or 'Female'"
+    
     try:
         stage = float(data['Stage']) if data['Stage'] not in [None, '', 'null'] else None
         if stage is not None and (stage < 1 or stage > 4):
             return False, "Stage must be between 1 and 4"
     except (ValueError, TypeError):
         return False, "Stage must be a valid number"
+    
     return True, "Valid input data"
 
 def preprocess_input(data):

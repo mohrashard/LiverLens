@@ -1,4 +1,4 @@
-// App.js
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
 import LiverLensLanding from './pages/landing';
