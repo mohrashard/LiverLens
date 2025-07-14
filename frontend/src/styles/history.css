@@ -586,6 +586,7 @@ body {
   gap: 8px;
   margin-bottom: 16px;
   align-items: center;
+  
 }
 
 .filter-tag {
@@ -596,6 +597,7 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+  color: #0f172a;
 }
 
 .filter-tag button {
