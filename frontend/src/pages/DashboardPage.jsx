@@ -1,42 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/sidebar'; // Import the Sidebar component
+import React, { useState } from 'react';
+
+import Sidebar from '../components/sidebar';
 import { useAuth } from '../auth';
 import { UserCircle, BriefcaseMedical, GraduationCap } from 'lucide-react';
 import '../styles/dashboard.css';
 
 const DashboardPage = () => {
-  const { user, logout } = useAuth();
-  const [userDetails, setUserDetails] = useState(null);
+  const { user, logout } = useAuth(); // Use context user directly
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const response = await fetch('/profile', {
-          method: 'GET',
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUserDetails(data);
-        }
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      }
-    };
-
-    if (user) {
-      fetchUserDetails();
-    }
-  }, [user]);
 
   const handleLogout = () => {
     logout();
   };
 
   const getRoleIcon = () => {
-    const role = userDetails?.role || user?.role;
+    const role = user?.role;
     
     switch(role) {
       case 'Doctor':
@@ -49,26 +27,20 @@ const DashboardPage = () => {
     }
   };
 
-  // Format date from backend response
   const formatDate = (dateString) => {
     if (!dateString) return null;
     return new Date(dateString);
   };
 
-  // Use fetched user details when available
-  const displayUser = userDetails || user;
-
   return (
     <div className="dashboard-layout">
-      {/* Sidebar Component */}
       <Sidebar 
-        userRole={displayUser?.role} 
+        userRole={user?.role} 
         onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={setIsSidebarCollapsed}
       />
       
-      {/* Main Content */}
       <div className={`dashboard-content ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="dashboard-container">
           <div className="dashboard-header">
@@ -79,60 +51,58 @@ const DashboardPage = () => {
             <div className="profile-card">
               <div className="profile-header">
                 <UserCircle size={80} className="profile-icon" />
-                <h2 className="profile-name">{displayUser?.full_name}</h2>
-                <p className="profile-email">{displayUser?.email}</p>
+                <h2 className="profile-name">{user?.full_name}</h2>
+                <p className="profile-email">{user?.email}</p>
                 <div className="profile-role">
                   {getRoleIcon()}
-                  <span>{displayUser?.role || 'Not specified'}</span>
+                  <span>{user?.role || 'Not specified'}</span>
                 </div>
               </div>
 
               <div className="profile-details">
                 <div className="detail-item">
                   <strong>Member since:</strong>{' '}
-                  {displayUser?.created_at 
-                    ? formatDate(displayUser.created_at).toLocaleDateString() 
+                  {user?.created_at 
+                    ? formatDate(user.created_at).toLocaleDateString() 
                     : 'Unknown'}
                 </div>
                 
                 <div className="detail-item">
                   <strong>Last login:</strong>{' '}
-                  {displayUser?.last_login 
-                    ? formatDate(displayUser.last_login).toLocaleString()
+                  {user?.last_login 
+                    ? formatDate(user.last_login).toLocaleString()
                     : 'Never'}
                 </div>
                 
-                {/* Doctor-specific details */}
-                {displayUser?.role === 'Doctor' && displayUser?.doctor_info && (
+                {user?.role === 'Doctor' && user?.doctor_info && (
                   <>
                     <div className="role-divider">Medical Information</div>
                     <div className="detail-item">
-                      <strong>Medical License:</strong> {displayUser.doctor_info.medical_license_id || 'Not specified'}
+                      <strong>Medical License:</strong> {user.doctor_info.medical_license_id || 'Not specified'}
                     </div>
                     <div className="detail-item">
-                      <strong>Specialty:</strong> {displayUser.doctor_info.specialty || 'Not specified'}
+                      <strong>Specialty:</strong> {user.doctor_info.specialty || 'Not specified'}
                     </div>
                     <div className="detail-item">
-                      <strong>Hospital/Clinic:</strong> {displayUser.doctor_info.hospital_clinic_name || 'Not specified'}
+                      <strong>Hospital/Clinic:</strong> {user.doctor_info.hospital_clinic_name || 'Not specified'}
                     </div>
                     <div className="detail-item">
-                      <strong>Country:</strong> {displayUser.doctor_info.country || 'Not specified'}
+                      <strong>Country:</strong> {user.doctor_info.country || 'Not specified'}
                     </div>
                   </>
                 )}
                 
-                {/* Academic-specific details */}
-                {['Researcher', 'Student'].includes(displayUser?.role) && displayUser?.academic_info && (
+                {['Researcher', 'Student'].includes(user?.role) && user?.academic_info && (
                   <>
                     <div className="role-divider">Academic Information</div>
                     <div className="detail-item">
-                      <strong>Institution:</strong> {displayUser.academic_info.institution_name || 'Not specified'}
+                      <strong>Institution:</strong> {user.academic_info.institution_name || 'Not specified'}
                     </div>
                     <div className="detail-item">
-                      <strong>Department:</strong> {displayUser.academic_info.department || 'Not specified'}
+                      <strong>Department:</strong> {user.academic_info.department || 'Not specified'}
                     </div>
                     <div className="detail-item">
-                      <strong>Position:</strong> {displayUser.academic_info.role_title || 'Not specified'}
+                      <strong>Position:</strong> {user.academic_info.role_title || 'Not specified'}
                     </div>
                   </>
                 )}

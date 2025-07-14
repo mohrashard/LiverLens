@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
 import LiverLensLanding from './pages/landing';
@@ -6,6 +5,7 @@ import UserRegistration from './pages/register';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PredictPage from './pages/predict';
+import HistoryPage from './pages/history';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const ProtectedRoute = ({ children }) => {
@@ -39,6 +39,14 @@ function AppRouter() {
             element={
               <ProtectedRoute>
                 <PredictPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <HistoryPage />
               </ProtectedRoute>
             }
           />

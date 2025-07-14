@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify, session
 from pymongo import MongoClient
 from bson import ObjectId
+from bson.errors import InvalidId
 from dotenv import load_dotenv
 from functools import wraps
 import warnings
@@ -63,7 +64,8 @@ def add_cors_headers(response):
 
 @app.route('/predict', methods=['OPTIONS'])
 @app.route('/history', methods=['OPTIONS'])
-def options_handler():
+@app.route('/history/<prediction_id>', methods=['OPTIONS'])  
+def options_handler(prediction_id=None): 
     return '', 200
 
 def login_required(f):
@@ -235,6 +237,32 @@ def predict():
         logger.error(f"Prediction error: {e}")
         return jsonify({'error': 'Prediction failed. Please try again.'}), 500
 
+@app.route('/history/<prediction_id>', methods=['DELETE'])
+@login_required
+def delete_prediction(prediction_id):
+    try:
+        user_id = session['user_id']
+        try:
+            obj_id = ObjectId(prediction_id)
+        except InvalidId:
+            return jsonify({'error': 'Invalid prediction ID'}), 400
+        
+        prediction = predictions_collection.find_one({
+            '_id': obj_id,
+            'user_id': user_id
+        })
+        if not prediction:
+            return jsonify({'error': 'Prediction not found or not authorized'}), 404
+        
+        result = predictions_collection.delete_one({'_id': obj_id})
+        if result.deleted_count == 1:
+            return jsonify({'message': 'Prediction deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Failed to delete prediction'}), 500
+    except Exception as e:
+        logger.error(f"Delete prediction error: {e}")
+        return jsonify({'error': 'Failed to delete prediction'}), 500
+
 @app.route('/history', methods=['GET'])
 @login_required
 def get_history():
@@ -245,12 +273,14 @@ def get_history():
         skip = (page - 1) * per_page
         total_count = predictions_collection.count_documents({'user_id': user_id})
         predictions = list(predictions_collection.find(
-            {'user_id': user_id},
-            {'_id': 0}
+            {'user_id': user_id}
         ).sort('timestamp', -1).skip(skip).limit(per_page))
+        
         for prediction in predictions:
+            prediction['_id'] = str(prediction['_id'])
             if 'timestamp' in prediction:
                 prediction['timestamp'] = prediction['timestamp'].isoformat()
+        
         response_data = {
             'predictions': predictions,
             'pagination': {

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -29,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        setUser(data); // Fix: Use data directly, not data.user
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
@@ -56,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setUser(data.user);
+        setUser(data.user); // Login response has 'user' key
         setIsAuthenticated(true);
         return { 
           success: true, 
@@ -70,7 +69,6 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: 'Network error. Please try again.' };
     }
   };
-
 
   const register = async (formData) => {
     try {
