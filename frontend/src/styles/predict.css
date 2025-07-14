@@ -24,18 +24,18 @@ body {
 .main-content {
   flex: 1;
   padding: 2rem;
-  margin-left: 300px; /* Default sidebar width */
+  margin-left: 300px;
   transition: margin-left 0.3s ease;
   overflow-y: auto;
   min-height: 100vh;
 }
 
-/* When sidebar is collapsed */
+
 .main-content.sidebar-collapsed {
-  margin-left: 80px; /* Collapsed sidebar width */
+  margin-left: 80px; 
 }
 
-/* Loading container */
+
 .loading-container {
   display: flex;
   flex-direction: column;
