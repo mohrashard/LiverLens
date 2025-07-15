@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Home,
   Activity,
@@ -19,13 +19,14 @@ import {
 const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation(); 
 
   // Universal navigation items for all users
   const universalItems = [
     { label: 'Dashboard', icon: Home, route: '/dashboard' },
     { label: 'Predict', icon: Activity, route: '/predict' },
     { label: 'History', icon: History, route: '/history' },
-    { label: 'Profile', icon: User, route: '/profile' },
+    { label: 'Profile', icon: User, route: '/ProfilePage' },
   ];
 
   // Role-specific navigation items
@@ -129,11 +130,12 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         <ul className="nav-items">
           {navigationItems.map((item, index) => {
             const IconComponent = item.icon;
+            const isActive = location.pathname === item.route;
             return (
               <li key={index} className="nav-item">
                 <Link
                   to={item.route}
-                  className="nav-link"
+                  className={`nav-link ${isActive ? 'active' : ''}`}
                   onClick={handleNavClick}
                   title={isCollapsed ? item.label : ''}
                 >
@@ -184,7 +186,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
 
         .mobile-overlay {
           display: none;
-          position: fixedGabri; fixed;
+          position: fixed;
           top: 0;
           left: 0;
           right: 0;
@@ -319,9 +321,8 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           border-left-color: rgba(255, 255, 255, 0.5);
         }
 
-        .nav-link:active,
         .nav-link.active {
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.2);
           border-left-color: white;
         }
 

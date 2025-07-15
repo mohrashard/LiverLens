@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PredictPage from './pages/predict';
 import HistoryPage from './pages/history';
+import ProfilePage from './pages/ProfilePage'; // Add this import
 import LoadingSpinner from './components/LoadingSpinner';
 
 const ProtectedRoute = ({ children }) => {
@@ -15,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
   
-  return isAuthenticated ? children : <Navigate to="/LoginPage" />;
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 function AppRouter() {
@@ -25,7 +26,7 @@ function AppRouter() {
         <Routes>
           <Route path="/" element={<LiverLensLanding />} />
           <Route path="/register" element={<UserRegistration />} />
-          <Route path="/LoginPage" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route
             path="/dashboard"
             element={
@@ -47,6 +48,15 @@ function AppRouter() {
             element={
               <ProtectedRoute>
                 <HistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          {/* Add the ProfilePage route */}
+          <Route
+            path="/ProfilePage"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />
