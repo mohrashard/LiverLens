@@ -14,7 +14,7 @@ import HistoryPage from "./pages/history";
 import ProfilePage from "./pages/ProfilePage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import PlaygroundPage from "./pages/PlaygroundPage";
-import LearningPage from "./pages/learn"; 
+import LearningPage from "./pages/learn";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -58,7 +58,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-          {/* Add the ProfilePage route */}
+        
           <Route
             path="/ProfilePage"
             element={
@@ -75,7 +75,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-                    <Route
+          <Route
             path="/learn"
             element={
               <ProtectedRoute>
@@ -83,7 +83,6 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
