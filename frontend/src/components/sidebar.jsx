@@ -36,7 +36,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
       { label: 'Report Builder', icon: FilePlus, route: '/report-builder' },
     ],
     Student: [
-      { label: 'Playground', icon: Gamepad2, route: '/playground' },
+      { label: 'Playground', icon: Gamepad2, route: '/PlaygroundPage' },
       { label: 'Learn', icon: BookOpen, route: '/learn' },
     ],
     Researcher: [
