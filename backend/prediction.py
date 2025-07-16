@@ -1,3 +1,4 @@
+# prediction.py
 import os
 import logging
 import joblib
@@ -57,14 +58,16 @@ load_model_and_components()
 def add_cors_headers(response):
     allowed_origin = os.getenv('CORS_ALLOWED_ORIGIN', 'http://localhost:3000')
     response.headers['Access-Control-Allow-Origin'] = allowed_origin
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
 
 @app.route('/predict', methods=['OPTIONS'])
+@app.route('/predict-only', methods=['OPTIONS'])
 @app.route('/history', methods=['OPTIONS'])
-@app.route('/history/<prediction_id>', methods=['OPTIONS'])  
+@app.route('/history/<prediction_id>', methods=['OPTIONS'])
+@app.route('/stats', methods=['OPTIONS'])
 def options_handler(prediction_id=None): 
     return '', 200
 
@@ -116,28 +119,43 @@ def validate_input_data(data):
 
 def preprocess_input(data):
     try:
-        age_years = data.get('Age')
-        if age_years not in [None, '', 'null']:
-            data['N_Days'] = float(age_years) * 365.25
-        else:
-            data['N_Days'] = np.nan
-        processed_data = {}
-        for key, value in data.items():
-            if value in [None, '', 'null']:
+        # Create a copy to avoid modifying original data
+        processed_data = data.copy()
+        
+        # Handle missing values
+        for key in processed_data:
+            if processed_data[key] in [None, '', 'null']:
                 processed_data[key] = np.nan
-            else:
-                processed_data[key] = value
-        categorical_features = ['Drug', 'Sex', 'Ascites', 'Hepatomegaly', 'Spiders', 'Edema']
+        
+        # Convert numerical features
         numerical_features = [
             'N_Days', 'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper',
             'Alk_Phos', 'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin', 'Stage'
         ]
-        df = pd.DataFrame([processed_data])
+        
         for feature in numerical_features:
-            if feature in df.columns:
-                df[feature] = pd.to_numeric(df[feature], errors='coerce')
+            if feature in processed_data:
+                try:
+                    processed_data[feature] = float(processed_data[feature])
+                except (ValueError, TypeError):
+                    processed_data[feature] = np.nan
+        
+        # Convert categorical features
+        categorical_features = ['Drug', 'Sex', 'Ascites', 'Hepatomegaly', 'Spiders', 'Edema']
+        for feature in categorical_features:
+            if feature in processed_data and processed_data[feature] not in [None, '', 'null']:
+                processed_data[feature] = str(processed_data[feature]).upper()[0]
+            else:
+                processed_data[feature] = 'N'  # Default to 'No'
+        
+        # Create DataFrame
+        df = pd.DataFrame([processed_data])
+        
+        # Apply imputation
         imputer = preprocessing_components['imputer']
         df[numerical_features] = imputer.transform(df[numerical_features])
+        
+        # Apply categorical encoding
         categorical_encoders = preprocessing_components.get('categorical_encoders', {})
         for feature in categorical_features:
             if feature in categorical_encoders and feature in df.columns:
@@ -145,11 +163,15 @@ def preprocess_input(data):
                 try:
                     df[feature] = encoder.transform(df[feature].astype(str))
                 except ValueError:
+                    # Handle unknown categories
                     df[feature] = encoder.transform([encoder.classes_[0]])[0]
+        
+        # Ensure all features are present
         feature_names = preprocessing_components['feature_names']
         for feature in feature_names:
             if feature not in df.columns:
                 df[feature] = 0
+        
         df = df[feature_names]
         logger.info(f"Preprocessed data shape: {df.shape}")
         return df
@@ -173,6 +195,61 @@ def get_risk_level(status):
     }
     return risk_levels.get(status, 'Unknown')
 
+def make_prediction(data):
+    """Core prediction logic shared by both endpoints"""
+    try:
+        logger.info("Starting prediction process")
+        
+        # Add default values for clinical exam features
+        data.setdefault('Ascites', 'N')
+        data.setdefault('Hepatomegaly', 'N')
+        data.setdefault('Spiders', 'N')
+        data.setdefault('Edema', 'N')
+        data.setdefault('Drug', 'Placebo')
+        data.setdefault('Tryglicerides', 100)
+        
+        logger.info(f"Data after defaults: {data}")
+        
+        is_valid, message = validate_input_data(data)
+        if not is_valid:
+            logger.error(f"Input validation failed: {message}")
+            return None, message
+        
+        logger.info("Input validation passed")
+        
+        processed_data = preprocess_input(data)
+        logger.info(f"Data preprocessing completed, shape: {processed_data.shape}")
+        
+        probabilities = model.predict_proba(processed_data)[0]
+        predicted_class_idx = np.argmax(probabilities)
+        
+        logger.info(f"Model prediction completed: class_idx={predicted_class_idx}")
+        
+        label_encoder = preprocessing_components['label_encoder']
+        predicted_status = label_encoder.inverse_transform([predicted_class_idx])[0]
+        
+        prob_dict = {}
+        for i, prob in enumerate(probabilities):
+            class_name = label_encoder.inverse_transform([i])[0]
+            prob_dict[class_name] = float(prob)
+        
+        response_data = {
+            'predicted_status': predicted_status,
+            'status_description': get_status_description(predicted_status),
+            'probabilities': prob_dict,
+            'risk_level': get_risk_level(predicted_status),
+            'disclaimer': 'This prediction is not a medical diagnosis. Please consult your healthcare provider.'
+        }
+        
+        logger.info(f"Prediction successful: {predicted_status}")
+        return response_data, None
+        
+    except Exception as e:
+        logger.error(f"Prediction error: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return None, f'Prediction failed: {str(e)}'
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({
@@ -191,50 +268,69 @@ def home():
         'version': '1.0.0',
         'endpoints': {
             'predict': '/predict (POST)',
+            'predict-only': '/predict-only (POST)',
             'history': '/history (GET)',
             'health': '/health (GET)'
         }
     }), 200
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict-only', methods=['POST'])
 @login_required
-def predict():
+def predict_only():
+    """Predict without saving to database - for playground use"""
     try:
         data = request.get_json()
         if not data:
+            logger.error("No input data provided")
             return jsonify({'error': 'No input data provided'}), 400
-        is_valid, message = validate_input_data(data)
-        if not is_valid:
-            return jsonify({'error': message}), 400
-        processed_data = preprocess_input(data)
-        probabilities = model.predict_proba(processed_data)[0]
-        predicted_class_idx = np.argmax(probabilities)
-        label_encoder = preprocessing_components['label_encoder']
-        predicted_status = label_encoder.inverse_transform([predicted_class_idx])[0]
-        prob_dict = {}
-        for i, prob in enumerate(probabilities):
-            class_name = label_encoder.inverse_transform([i])[0]
-            prob_dict[class_name] = float(prob)
-        response_data = {
-            'predicted_status': predicted_status,
-            'status_description': get_status_description(predicted_status),
-            'probabilities': prob_dict,
-            'risk_level': get_risk_level(predicted_status),
-            'disclaimer': 'This prediction is not a medical diagnosis. Please consult your healthcare provider.'
-        }
+        
+        logger.info(f"Received playground prediction request for user {session['user_id']}")
+        logger.info(f"Input data: {data}")
+        
+        response_data, error = make_prediction(data)
+        if error:
+            logger.error(f"Prediction error: {error}")
+            return jsonify({'error': error}), 400
+        
+        logger.info(f"Playground prediction successful for user {session['user_id']}: {response_data['predicted_status']}")
+        return jsonify(response_data), 200
+    except Exception as e:
+        logger.error(f"Playground prediction error: {str(e)}")
+        return jsonify({'error': 'Prediction failed. Please try again.'}), 500
+
+@app.route('/predict', methods=['POST'])
+@login_required
+def predict():
+    """Predict and save to database"""
+    try:
+        data = request.get_json()
+        if not data:
+            logger.error("No input data provided")
+            return jsonify({'error': 'No input data provided'}), 400
+        
+        logger.info(f"Received prediction request for user {session['user_id']}")
+        logger.info(f"Input data: {data}")
+        
+        response_data, error = make_prediction(data)
+        if error:
+            logger.error(f"Prediction error: {error}")
+            return jsonify({'error': error}), 400
+        
+        # Save prediction to database
         prediction_record = {
             'user_id': session['user_id'],
             'input_data': data,
-            'prediction': predicted_status,
-            'probabilities': prob_dict,
-            'risk_level': get_risk_level(predicted_status),
+            'prediction': response_data['predicted_status'],
+            'probabilities': response_data['probabilities'],
+            'risk_level': response_data['risk_level'],
             'timestamp': datetime.utcnow()
         }
+        
         predictions_collection.insert_one(prediction_record)
-        logger.info(f"Prediction made for user {session['user_id']}: {predicted_status}")
+        logger.info(f"Prediction made and saved for user {session['user_id']}: {response_data['predicted_status']}")
         return jsonify(response_data), 200
     except Exception as e:
-        logger.error(f"Prediction error: {e}")
+        logger.error(f"Prediction error: {str(e)}")
         return jsonify({'error': 'Prediction failed. Please try again.'}), 500
 
 @app.route('/history/<prediction_id>', methods=['DELETE'])
