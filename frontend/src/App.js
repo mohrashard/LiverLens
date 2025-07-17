@@ -17,7 +17,9 @@ import PlaygroundPage from "./pages/PlaygroundPage";
 import LearningPage from "./pages/learn";
 import UploadCSVPage from "./pages/UploadCSVPage";
 import ReportBuilderPage from "./pages/ReportBuilderPage";
-import DatasetExplorerPage from "./pages/DatasetExplorerPage"
+import DatasetExplorerPage from "./pages/DatasetExplorerPage";
+import AnalysisPage from "./pages/AnalysisPage";
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -60,7 +62,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-        
+
           <Route
             path="/ProfilePage"
             element={
@@ -85,7 +87,7 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-            <Route
+          <Route
             path="/UploadCSVPage"
             element={
               <ProtectedRoute>
@@ -93,19 +95,27 @@ function AppRouter() {
               </ProtectedRoute>
             }
           />
-                      <Route
+          <Route
             path="/ReportBuilderPage"
             element={
               <ProtectedRoute>
-                <ReportBuilderPage/>
+                <ReportBuilderPage />
               </ProtectedRoute>
             }
           />
-                                <Route
+          <Route
             path="/DatasetExplorerPage"
             element={
               <ProtectedRoute>
-                <DatasetExplorerPage/>
+                <DatasetExplorerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/AnalysisPage"
+            element={
+              <ProtectedRoute>
+                <AnalysisPage />
               </ProtectedRoute>
             }
           />

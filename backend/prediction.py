@@ -10,6 +10,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
 from functools import wraps
+from collections import defaultdict
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -67,6 +68,13 @@ def add_cors_headers(response):
 @app.route('/stats', methods=['OPTIONS'])
 @app.route('/predict/bulk', methods=['OPTIONS'])
 @app.route('/api/explore', methods=['OPTIONS'])
+@app.route('/api/analysis/summary', methods=['OPTIONS'])
+@app.route('/api/analysis/outcomes', methods=['OPTIONS'])
+@app.route('/api/analysis/feature-distribution', methods=['OPTIONS'])
+@app.route('/api/analysis/correlation', methods=['OPTIONS'])
+@app.route('/api/analysis/feature-importance', methods=['OPTIONS'])
+@app.route('/api/analysis/temporal-trends', methods=['OPTIONS'])
+@app.route('/api/analysis/subgroup-comparison', methods=['OPTIONS'])
 def options_handler(prediction_id=None):
     return '', 200
 
@@ -434,7 +442,486 @@ def bulk_delete_predictions():
         return jsonify({'error': 'No predictions were deleted'}), 400
     except Exception as e:
         logger.error(f"Bulk delete error: {e}")
-        return jsonify({'error': 'Failed to delete predictions'}), 500    
+        return jsonify({'error': 'Failed to delete predictions'}), 500  
+    
+@app.route('/api/analysis/summary', methods=['GET'])
+@login_required
+def get_analysis_summary():
+    """Get summary statistics for all predictions"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Aggregate pipeline for summary statistics
+        pipeline = [
+            {
+                '$group': {
+                    '_id': None,
+                    'total_predictions': {'$sum': 1},
+                    'avg_age': {'$avg': '$input_data.Age'},
+                    'avg_bilirubin': {'$avg': '$input_data.Bilirubin'},
+                    'avg_albumin': {'$avg': '$input_data.Albumin'},
+                    'avg_cholesterol': {'$avg': '$input_data.Cholesterol'},
+                    'avg_copper': {'$avg': '$input_data.Copper'},
+                    'avg_alk_phos': {'$avg': '$input_data.Alk_Phos'},
+                    'avg_sgot': {'$avg': '$input_data.SGOT'},
+                    'avg_tryglicerides': {'$avg': '$input_data.Tryglicerides'},
+                    'avg_platelets': {'$avg': '$input_data.Platelets'},
+                    'avg_prothrombin': {'$avg': '$input_data.Prothrombin'},
+                    'high_risk_count': {
+                        '$sum': {'$cond': [{'$eq': ['$risk_level', 'High']}, 1, 0]}
+                    },
+                    'medium_risk_count': {
+                        '$sum': {'$cond': [{'$eq': ['$risk_level', 'Medium']}, 1, 0]}
+                    },
+                    'low_risk_count': {
+                        '$sum': {'$cond': [{'$eq': ['$risk_level', 'Low']}, 1, 0]}
+                    }
+                }
+            }
+        ]
+        
+        result = list(predictions_collection.aggregate(pipeline))
+        
+        if not result:
+            return jsonify({
+                'total_predictions': 0,
+                'avg_age': 0,
+                'avg_bilirubin': 0,
+                'avg_albumin': 0,
+                'avg_cholesterol': 0,
+                'avg_copper': 0,
+                'avg_alk_phos': 0,
+                'avg_sgot': 0,
+                'avg_tryglicerides': 0,
+                'avg_platelets': 0,
+                'avg_prothrombin': 0,
+                'high_risk_count': 0,
+                'medium_risk_count': 0,
+                'low_risk_count': 0
+            }), 200
+        
+        summary = result[0]
+        summary.pop('_id', None)
+        
+        # Handle null values
+        for key, value in summary.items():
+            if value is None:
+                summary[key] = 0
+        
+        return jsonify(summary), 200
+        
+    except Exception as e:
+        logger.error(f"Analysis summary error: {str(e)}")
+        return jsonify({'error': 'Failed to generate summary statistics'}), 500
+
+@app.route('/api/analysis/outcomes', methods=['GET'])
+@login_required
+def get_prediction_outcomes():
+    """Get prediction outcome distribution"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Count predictions by status
+        pipeline = [
+            {
+                '$group': {
+                    '_id': '$prediction',
+                    'count': {'$sum': 1}
+                }
+            }
+        ]
+        
+        results = list(predictions_collection.aggregate(pipeline))
+        
+        # Calculate total for percentages
+        total = sum(result['count'] for result in results)
+        
+        if total == 0:
+            return jsonify([]), 200
+        
+        # Format results
+        outcomes = []
+        for result in results:
+            status = result['_id'] if result['_id'] else 'Unknown'
+            outcomes.append({
+                'status': status,
+                'count': result['count'],
+                'percentage': (result['count'] / total) * 100
+            })
+        
+        # Sort by count descending
+        outcomes.sort(key=lambda x: x['count'], reverse=True)
+        
+        return jsonify(outcomes), 200
+        
+    except Exception as e:
+        logger.error(f"Prediction outcomes error: {str(e)}")
+        return jsonify({'error': 'Failed to fetch prediction outcomes'}), 500
+
+@app.route('/api/analysis/feature-distribution', methods=['GET'])
+@login_required
+def get_feature_distribution():
+    """Get feature distribution histograms"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Get all predictions
+        predictions = list(predictions_collection.find({}, {'input_data': 1}))
+        
+        if not predictions:
+            return jsonify({}), 200
+        
+        # Extract numerical features
+        numerical_features = [
+            'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper',
+            'Alk_Phos', 'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin'
+        ]
+        
+        distributions = {}
+        
+        for feature in numerical_features:
+            # Extract values for this feature
+            values = []
+            for pred in predictions:
+                if 'input_data' in pred and feature in pred['input_data']:
+                    val = pred['input_data'][feature]
+                    if val is not None:
+                        try:
+                            val_float = float(val)
+                            if not np.isnan(val_float) and not np.isinf(val_float):
+                                values.append(val_float)
+                        except (ValueError, TypeError):
+                            continue
+            
+            if not values:
+                continue
+            
+            # Calculate statistics
+            values_array = np.array(values)
+            mean_val = np.mean(values_array)
+            std_val = np.std(values_array)
+            
+            # Create histogram bins
+            min_val = np.min(values_array)
+            max_val = np.max(values_array)
+            
+            # Avoid division by zero
+            if min_val == max_val:
+                bins = np.array([min_val - 0.5, max_val + 0.5])
+            else:
+                bins = np.linspace(min_val, max_val, 11)  # 10 bins
+            
+            hist, bin_edges = np.histogram(values_array, bins=bins)
+            
+            # Format histogram data
+            histogram_data = []
+            max_count = max(hist) if len(hist) > 0 else 1
+            
+            for i in range(len(hist)):
+                histogram_data.append({
+                    'range': f"{bin_edges[i]:.1f}-{bin_edges[i+1]:.1f}",
+                    'count': int(hist[i])
+                })
+            
+            distributions[feature] = {
+                'histogram': histogram_data,
+                'mean': float(mean_val),
+                'std': float(std_val),
+                'max_count': int(max_count)
+            }
+        
+        return jsonify(distributions), 200
+        
+    except Exception as e:
+        logger.error(f"Feature distribution error: {str(e)}")
+        return jsonify({'error': 'Failed to calculate feature distributions'}), 500
+
+@app.route('/api/analysis/correlation', methods=['GET'])
+@login_required
+def get_correlation_matrix():
+    """Get correlation matrix for numerical features"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Get all predictions
+        predictions = list(predictions_collection.find({}, {'input_data': 1}))
+        
+        if not predictions:
+            return jsonify({'correlation_matrix': [], 'features': []}), 200
+        
+        # Extract numerical features
+        numerical_features = [
+            'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper',
+            'Alk_Phos', 'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin'
+        ]
+        
+        # Create DataFrame
+        data = []
+        for pred in predictions:
+            if 'input_data' not in pred:
+                continue
+            
+            row = {}
+            for feature in numerical_features:
+                if feature in pred['input_data']:
+                    val = pred['input_data'][feature]
+                    if val is not None:
+                        try:
+                            val_float = float(val)
+                            if not np.isnan(val_float) and not np.isinf(val_float):
+                                row[feature] = val_float
+                            else:
+                                row[feature] = np.nan
+                        except (ValueError, TypeError):
+                            row[feature] = np.nan
+                    else:
+                        row[feature] = np.nan
+                else:
+                    row[feature] = np.nan
+            data.append(row)
+        
+        if not data:
+            return jsonify({'correlation_matrix': [], 'features': []}), 200
+        
+        df = pd.DataFrame(data)
+        
+        # Remove features with all NaN values
+        df_clean = df.dropna(axis=1, how='all')
+        
+        if df_clean.empty:
+            return jsonify({'correlation_matrix': [], 'features': []}), 200
+        
+        # Calculate correlation matrix
+        correlation_matrix = df_clean.corr()
+        
+        # Convert to list format for frontend
+        correlation_list = correlation_matrix.values.tolist()
+        features_list = correlation_matrix.columns.tolist()
+        
+        # Replace NaN values with 0
+        for i in range(len(correlation_list)):
+            for j in range(len(correlation_list[i])):
+                if pd.isna(correlation_list[i][j]):
+                    correlation_list[i][j] = 0
+        
+        return jsonify({
+            'correlation_matrix': correlation_list,
+            'features': features_list
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Correlation matrix error: {str(e)}")
+        return jsonify({'error': 'Failed to calculate correlation matrix'}), 500
+
+@app.route('/api/analysis/feature-importance', methods=['GET'])
+@login_required
+def get_feature_importance():
+    """Get feature importance from the trained model"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        if model is None or preprocessing_components is None:
+            return jsonify({'error': 'Model not loaded'}), 500
+        
+        # Get feature names and importances
+        feature_names = preprocessing_components.get('feature_names', [])
+        
+        if hasattr(model, 'feature_importances_'):
+            importances = model.feature_importances_
+        else:
+            # Fallback for models without feature_importances_
+            logger.warning("Model does not have feature_importances_ attribute")
+            importances = np.random.random(len(feature_names))  # Placeholder
+        
+        if len(importances) != len(feature_names):
+            logger.warning(f"Mismatch between importances ({len(importances)}) and feature names ({len(feature_names)})")
+            # Adjust to match
+            min_len = min(len(importances), len(feature_names))
+            importances = importances[:min_len]
+            feature_names = feature_names[:min_len]
+        
+        # Combine and sort by importance
+        feature_importance = [
+            {'feature': name, 'importance': float(importance)}
+            for name, importance in zip(feature_names, importances)
+        ]
+        
+        feature_importance.sort(key=lambda x: x['importance'], reverse=True)
+        
+        return jsonify(feature_importance), 200
+        
+    except Exception as e:
+        logger.error(f"Feature importance error: {str(e)}")
+        return jsonify({'error': 'Failed to get feature importance'}), 500
+
+@app.route('/api/analysis/temporal-trends', methods=['GET'])
+@login_required
+def get_temporal_trends():
+    """Get temporal trends of predictions"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Get predictions with timestamps
+        predictions = list(predictions_collection.find({}, {'timestamp': 1}))
+        
+        if not predictions:
+            return jsonify([]), 200
+        
+        # Group by date
+        date_counts = defaultdict(int)
+        
+        for pred in predictions:
+            timestamp = pred.get('timestamp')
+            if timestamp:
+                try:
+                    if isinstance(timestamp, str):
+                        # Parse string timestamp
+                        timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                    date_str = timestamp.strftime('%Y-%m-%d')
+                    date_counts[date_str] += 1
+                except (ValueError, AttributeError) as e:
+                    logger.warning(f"Invalid timestamp format: {timestamp}, error: {e}")
+                    continue
+        
+        # Convert to list and sort by date
+        trends = [
+            {'date': date, 'count': count}
+            for date, count in date_counts.items()
+        ]
+        
+        trends.sort(key=lambda x: x['date'])
+        
+        return jsonify(trends), 200
+        
+    except Exception as e:
+        logger.error(f"Temporal trends error: {str(e)}")
+        return jsonify({'error': 'Failed to get temporal trends'}), 500
+
+@app.route('/api/analysis/subgroup-comparison', methods=['GET'])
+@login_required
+def get_subgroup_comparison():
+    """Get comparison between different subgroups"""
+    if session.get('role') != 'Researcher':
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
+    
+    try:
+        # Get all predictions
+        predictions = list(predictions_collection.find({}, {'input_data': 1, 'risk_level': 1}))
+        
+        if not predictions:
+            return jsonify({}), 200
+        
+        comparisons = {}
+        
+        # Helper function to safely get numeric value
+        def safe_float(value):
+            if value is None:
+                return None
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return None
+        
+        # Helper function to calculate group statistics
+        def calculate_group_stats(group_preds):
+            if not group_preds:
+                return {
+                    'count': 0,
+                    'avg_age': None,
+                    'avg_bilirubin': None,
+                    'avg_albumin': None
+                }
+            
+            ages = [safe_float(p.get('input_data', {}).get('Age')) for p in group_preds]
+            ages = [age for age in ages if age is not None]
+            
+            bilirubins = [safe_float(p.get('input_data', {}).get('Bilirubin')) for p in group_preds]
+            bilirubins = [bil for bil in bilirubins if bil is not None]
+            
+            albumins = [safe_float(p.get('input_data', {}).get('Albumin')) for p in group_preds]
+            albumins = [alb for alb in albumins if alb is not None]
+            
+            return {
+                'count': len(group_preds),
+                'avg_age': float(np.mean(ages)) if ages else None,
+                'avg_bilirubin': float(np.mean(bilirubins)) if bilirubins else None,
+                'avg_albumin': float(np.mean(albumins)) if albumins else None
+            }
+        
+        # Gender comparison
+        gender_groups = {'Male': [], 'Female': []}
+        for pred in predictions:
+            sex = pred.get('input_data', {}).get('Sex', 'M')
+            if sex:
+                sex = str(sex).upper()
+                if sex in ['M', 'MALE']:
+                    gender_groups['Male'].append(pred)
+                elif sex in ['F', 'FEMALE']:
+                    gender_groups['Female'].append(pred)
+        
+        comparisons['gender'] = {}
+        for group, group_preds in gender_groups.items():
+            comparisons['gender'][group] = calculate_group_stats(group_preds)
+        
+        # Risk level comparison
+        risk_groups = {'Low': [], 'Medium': [], 'High': []}
+        for pred in predictions:
+            risk = pred.get('risk_level', 'Low')
+            if risk and risk in risk_groups:
+                risk_groups[risk].append(pred)
+        
+        comparisons['risk_level'] = {}
+        for group, group_preds in risk_groups.items():
+            comparisons['risk_level'][group] = calculate_group_stats(group_preds)
+        
+        # Age group comparison
+        age_groups = {'Under_50': [], 'Over_50': []}
+        for pred in predictions:
+            age = safe_float(pred.get('input_data', {}).get('Age'))
+            if age is not None and age > 0:
+                group = 'Under_50' if age < 50 else 'Over_50'
+                age_groups[group].append(pred)
+        
+        comparisons['age_group'] = {}
+        for group, group_preds in age_groups.items():
+            comparisons['age_group'][group] = calculate_group_stats(group_preds)
+        
+        # Stage comparison
+        stage_groups = {'Stage_1': [], 'Stage_2': [], 'Stage_3': [], 'Stage_4': []}
+        for pred in predictions:
+            stage = safe_float(pred.get('input_data', {}).get('Stage'))
+            if stage is not None and 1 <= stage <= 4:
+                stage_key = f'Stage_{int(stage)}'
+                stage_groups[stage_key].append(pred)
+        
+        comparisons['stage'] = {}
+        for group, group_preds in stage_groups.items():
+            if group_preds:  # Only include non-empty groups
+                comparisons['stage'][group] = calculate_group_stats(group_preds)
+        
+        # Drug comparison
+        drug_groups = defaultdict(list)
+        for pred in predictions:
+            drug = pred.get('input_data', {}).get('Drug', 'Unknown')
+            if drug:
+                drug_groups[str(drug)].append(pred)
+        
+        comparisons['drug'] = {}
+        for group, group_preds in drug_groups.items():
+            if len(group_preds) >= 5:  # Only include groups with at least 5 predictions
+                comparisons['drug'][group] = calculate_group_stats(group_preds)
+        
+        return jsonify(comparisons), 200
+        
+    except Exception as e:
+        logger.error(f"Subgroup comparison error: {str(e)}")
+        return jsonify({'error': 'Failed to get subgroup comparison'}), 500     
 
 @app.route('/stats', methods=['GET'])
 @login_required
@@ -474,8 +961,7 @@ def get_stats():
         logger.error(f"Stats retrieval error: {e}")
         return jsonify({'error': 'Failed to retrieve statistics'}), 500
 
-# Updated /api/explore endpoint in prediction.py
-# Replace the existing /api/explore route with this updated version
+
 @app.route('/api/explore', methods=['GET'])
 @login_required
 def explore_data():

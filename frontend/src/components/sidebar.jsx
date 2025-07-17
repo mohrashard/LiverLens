@@ -41,7 +41,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
     ],
     Researcher: [
       { label: 'Dataset Explorer', icon: FolderSearch, route: '/DatasetExplorerPage' },
-      { label: 'Analysis', icon: BarChart, route: '/analysis' },
+      { label: 'Analysis', icon: BarChart, route: '/AnalysisPage' },
     ],
   };
 
