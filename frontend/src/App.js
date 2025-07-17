@@ -15,7 +15,9 @@ import ProfilePage from "./pages/ProfilePage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import LearningPage from "./pages/learn";
-
+import UploadCSVPage from "./pages/UploadCSVPage";
+import ReportBuilderPage from "./pages/ReportBuilderPage";
+import DatasetExplorerPage from "./pages/DatasetExplorerPage"
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -23,7 +25,7 @@ const ProtectedRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  return isAuthenticated ? children : <Navigate to="/LoginPage" />;
 };
 
 function AppRouter() {
@@ -80,6 +82,30 @@ function AppRouter() {
             element={
               <ProtectedRoute>
                 <LearningPage />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/UploadCSVPage"
+            element={
+              <ProtectedRoute>
+                <UploadCSVPage />
+              </ProtectedRoute>
+            }
+          />
+                      <Route
+            path="/ReportBuilderPage"
+            element={
+              <ProtectedRoute>
+                <ReportBuilderPage/>
+              </ProtectedRoute>
+            }
+          />
+                                <Route
+            path="/DatasetExplorerPage"
+            element={
+              <ProtectedRoute>
+                <DatasetExplorerPage/>
               </ProtectedRoute>
             }
           />

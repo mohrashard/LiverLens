@@ -1,0 +1,954 @@
+/* ReportBuilder CSS */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3a8a, #0f172a);
+   margin-left: 40px; 
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 300px; 
+  overflow-y: auto;
+  transition: margin-left 0.3s ease;
+}
+
+.report-builder-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.report-header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.header-text h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-text p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.search-section,
+.patient-summary,
+.clinical-section,
+.prediction-section,
+.trend-section,
+.notes-section,
+.actions-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.search-section:hover,
+.patient-summary:hover,
+.clinical-section:hover,
+.prediction-section:hover,
+.trend-section:hover,
+.notes-section:hover,
+.actions-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  color: #60a5fa;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.search-form {
+  display: flex;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-primary, .btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: white;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
+.alert-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.summary-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-icon {
+  width: 24px;
+  height: 24px;
+  color: #60a5fa;
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  display: block;
+  font-weight: 600;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.clinical-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.clinical-table th,
+.clinical-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clinical-table th {
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  position: sticky;
+  top: 0;
+}
+
+.clinical-table td {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.clinical-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.parameter-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.parameter-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.parameter-status {
+  text-align: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.risk-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.risk-high {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
+.risk-medium {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  color: #fed7aa;
+}
+
+.risk-low {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1));
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  color: #bbf7d0;
+}
+
+.risk-icon {
+  flex-shrink: 0;
+}
+
+.risk-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.risk-level {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.risk-prediction {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.confidence-section {
+  margin-top: 2rem;
+}
+
+.confidence-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.confidence-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.confidence-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.confidence-label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.confidence-value {
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.confidence-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.prediction-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-icon {
+  width: 24px;
+  height: 24px;
+  color: #60a5fa;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-value {
+  display: block;
+  font-weight: 600;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.chart-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.chart-header h3 {
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.chart-header p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.custom-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-label {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.tooltip-value {
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.notes-content textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.notes-content textarea:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.notes-content textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.notes-tips {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 8px;
+}
+
+.notes-tips h4 {
+  color: #60a5fa;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.notes-tips ul {
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 1rem;
+}
+
+.notes-tips li {
+  margin: 0.25rem 0;
+}
+
+.actions-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.actions-header h2 {
+  color: white;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.actions-header p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.pdf-preview-content {
+  padding: 2rem;
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+}
+
+/* PDF Styles for better fit */
+.pdf-container {
+  max-width: 100%;
+  margin: 0 auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.pdf-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #1e3a8a;
+}
+
+.pdf-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+}
+
+.pdf-title {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.pdf-meta {
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.pdf-section {
+  margin-bottom: 20px;
+  break-inside: avoid;
+}
+
+.pdf-section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.pdf-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.pdf-info-item {
+  display: flex;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #1e3a8a;
+}
+
+.pdf-info-label {
+  font-weight: bold;
+  color: #374151;
+  margin-right: 8px;
+  min-width: 80px;
+}
+
+.pdf-info-value {
+  color: #1f2937;
+}
+
+.pdf-clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 11px;
+}
+
+.pdf-clinical-table th,
+.pdf-clinical-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+}
+
+.pdf-clinical-table th {
+  background: #f8fafc;
+  font-weight: bold;
+  color: #374151;
+}
+
+.pdf-clinical-table tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.pdf-risk-badge {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  margin: 15px 0;
+  width: 100%;
+}
+
+.pdf-risk-high {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 2px solid #fecaca;
+}
+
+.pdf-risk-medium {
+  background: #fffbeb;
+  color: #d97706;
+  border: 2px solid #fed7aa;
+}
+
+.pdf-risk-low {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 2px solid #bbf7d0;
+}
+
+.pdf-confidence-section {
+  margin: 15px 0;
+}
+
+.pdf-confidence-item {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+  padding: 6px;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.pdf-confidence-label {
+  font-weight: bold;
+  width: 100px;
+  color: #374151;
+  font-size: 11px;
+}
+
+.pdf-confidence-bar {
+  flex: 1;
+  height: 15px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 8px;
+}
+
+.pdf-confidence-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.pdf-notes-section {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin: 15px 0;
+}
+
+.pdf-notes-content {
+  color: #374151;
+  line-height: 1.6;
+  font-size: 11px;
+}
+
+.pdf-footer {
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 2px solid #e5e7eb;
+  text-align: center;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.pdf-footer p {
+  margin: 3px 0;
+}
+
+.pdf-disclaimer {
+  background: #fef3c7;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #f59e0b;
+  margin: 15px 0;
+  font-size: 11px;
+}
+
+.pdf-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.pdf-column {
+  break-inside: avoid;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header-text h1 {
+    font-size: 2rem;
+  }
+
+  .search-form {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .summary-header {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .pdf-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .pdf-container {
+    max-width: none;
+    margin: 0;
+    padding: 10px;
+    font-size: 10px;
+  }
+
+  .pdf-section {
+    page-break-inside: avoid;
+    margin-bottom: 15px;
+  }
+
+  .pdf-clinical-table {
+    font-size: 9px;
+  }
+
+  .pdf-clinical-table th,
+  .pdf-clinical-table td {
+    padding: 4px 6px;
+  }
+}

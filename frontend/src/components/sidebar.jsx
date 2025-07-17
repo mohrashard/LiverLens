@@ -32,15 +32,15 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
   // Role-specific navigation items
   const roleSpecificItems = {
     Doctor: [
-      { label: 'Upload CSV', icon: Upload, route: '/bulk-upload' },
-      { label: 'Report Builder', icon: FilePlus, route: '/report-builder' },
+      { label: 'Upload CSV', icon: Upload, route: '/UploadCSVPage' },
+      { label: 'Report Builder', icon: FilePlus, route: '/ReportBuilderPage' },
     ],
     Student: [
       { label: 'Playground', icon: Gamepad2, route: '/PlaygroundPage' },
       { label: 'Learn', icon: BookOpen, route: '/learn' },
     ],
     Researcher: [
-      { label: 'Dataset Explorer', icon: FolderSearch, route: '/datasets' },
+      { label: 'Dataset Explorer', icon: FolderSearch, route: '/DatasetExplorerPage' },
       { label: 'Analysis', icon: BarChart, route: '/analysis' },
     ],
   };

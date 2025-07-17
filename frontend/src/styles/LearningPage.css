@@ -1527,7 +1527,7 @@ body {
 .view-btn:focus,
 .category-btn:focus,
 button:focus {
-  outline: 3px solid #60a5fa99;
+  outline: 3px solid rgba(96, 165, 250, 0.6);
   outline-offset: 3px;
   border-radius: 8px;
 }
@@ -1540,7 +1540,16 @@ button:focus {
   will-change: transform;
 }
 
-
+/* Dark theme enhancements */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+  }
+  
+  .app-container {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+  }
+}
 
 /* Print styles */
 @media print {
