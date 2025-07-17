@@ -14,6 +14,8 @@ import {
   BarChart,
   Menu,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
@@ -78,7 +80,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         onClick={toggleMobileMenu}
         aria-label="Toggle mobile menu"
       >
-        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {/* Mobile Overlay */}
@@ -97,31 +99,26 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
       >
         {/* Logo Section */}
         <div className="sidebar-logo">
-          <img
-            src="/LiverenseLogo.png"
-            alt="LiverLens Logo"
-            className="logo-img"
-          />
+          <div className="logo-container">
+            <img
+              src="/LiverenseLogo.png"
+              alt="LiverLens Logo"
+              className="logo-img"
+            />
+          </div>
           {!isCollapsed && <h2 className="logo-text">LiverLens</h2>}
         </div>
 
-        {/* Desktop Collapse Toggle */}
-        <button
-          className="collapse-toggle desktop-only"
-          onClick={toggleCollapse}
-          aria-label="Toggle sidebar"
-        >
-          <Menu size={20} />
-        </button>
 
         {/* User Info */}
         <div className="user-info">
           <div className="user-avatar">
-            <User size={24} />
+            <User size={18} />
           </div>
           {!isCollapsed && (
             <div className="user-details">
               <span className="user-role">{userRole}</span>
+              <span className="user-status">Online</span>
             </div>
           )}
         </div>
@@ -139,10 +136,11 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
                   onClick={handleNavClick}
                   title={isCollapsed ? item.label : ''}
                 >
-                  <IconComponent size={20} className="nav-icon" />
+                  <IconComponent size={18} className="nav-icon" />
                   {!isCollapsed && (
                     <span className="nav-label">{item.label}</span>
                   )}
+                  {isActive && <div className="active-indicator" />}
                 </Link>
               </li>
             );
@@ -156,7 +154,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
             onClick={handleLogout}
             title={isCollapsed ? 'Logout' : ''}
           >
-            <LogOut size={20} className="nav-icon" />
+            <LogOut size={18} className="nav-icon" />
             {!isCollapsed && <span className="nav-label">Logout</span>}
           </button>
         </div>
@@ -166,22 +164,24 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         .mobile-menu-toggle {
           display: none;
           position: fixed;
-          top: 1rem;
-          left: 1rem;
+          top: 0.75rem;
+          left: 0.75rem;
           z-index: 1001;
-          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          background: linear-gradient(135deg, #1e293b, #334155);
           color: white;
           border: none;
-          border-radius: 8px;
-          padding: 0.5rem;
+          border-radius: 10px;
+          padding: 0.6rem;
           cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
           transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
         }
 
         .mobile-menu-toggle:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+          background: linear-gradient(135deg, #334155, #475569);
         }
 
         .mobile-overlay {
@@ -191,8 +191,9 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.6);
           z-index: 998;
+          backdrop-filter: blur(2px);
         }
 
         .sidebar {
@@ -200,16 +201,17 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           top: 0;
           left: 0;
           height: 100vh;
-          width: 280px;
-          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          width: 260px;
+          background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
           color: white;
           padding: 0;
           z-index: 999;
-          transition: all 0.3s ease;
-          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
           display: flex;
           flex-direction: column;
           overflow-y: auto;
+          border-right: 1px solid rgba(148, 163, 184, 0.1);
         }
 
         .sidebar.collapsed {
@@ -217,46 +219,69 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         }
 
         .sidebar-logo {
-          padding: 1.5rem 1rem;
+          padding: 1.25rem;
           text-align: center;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.75rem;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.05));
+        }
+
+        .logo-container {
+          width: 45px;
+          height: 45px;
+          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 3px 12px rgba(59, 130, 246, 0.3);
+          transition: all 0.3s ease;
+        }
+
+        .logo-container:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
 
         .logo-img {
-          width: 50px;
-          height: 50px;
+          width: 28px;
+          height: 28px;
           object-fit: contain;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.1);
-          padding: 0.5rem;
+          filter: brightness(1.1);
         }
 
         .logo-text {
           font-size: 1.2rem;
-          font-weight: 600;
+          font-weight: 700;
           margin: 0;
-          opacity: 0.9;
+          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: -0.02em;
         }
 
         .collapse-toggle {
           position: absolute;
           top: 1rem;
-          right: 1rem;
-          background: rgba(255, 255, 255, 0.1);
-          border: none;
-          color: white;
+          right: 0.75rem;
+          background: rgba(148, 163, 184, 0.1);
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          color: #cbd5e1;
           border-radius: 6px;
-          padding: 0.5rem;
+          padding: 0.4rem;
           cursor: pointer;
           transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
         }
 
         .collapse-toggle:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(148, 163, 184, 0.2);
+          color: white;
+          transform: scale(1.05);
         }
 
         .desktop-only {
@@ -268,18 +293,20 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+          background: rgba(59, 130, 246, 0.05);
         }
 
         .user-avatar {
-          width: 40px;
-          height: 40px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
         .user-details {
@@ -288,8 +315,17 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         }
 
         .user-role {
-          font-size: 0.9rem;
-          opacity: 0.9;
+          display: block;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #e2e8f0;
+          margin-bottom: 0.15rem;
+        }
+
+        .user-status {
+          display: block;
+          font-size: 0.75rem;
+          color: #10b981;
           font-weight: 500;
         }
 
@@ -298,48 +334,69 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           padding: 0;
           margin: 0;
           flex: 1;
-          padding-top: 1rem;
+          padding: 0.75rem 0;
         }
 
         .nav-item {
-          margin: 0;
+          margin: 0.15rem 0;
         }
 
         .nav-link {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.875rem 1rem;
-          color: white;
+          padding: 0.75rem 1rem;
+          color: #cbd5e1;
           text-decoration: none;
           transition: all 0.3s ease;
-          border-left: 3px solid transparent;
+          position: relative;
+          border-radius: 0 20px 20px 0;
+          margin-right: 0.75rem;
         }
 
         .nav-link:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-left-color: rgba(255, 255, 255, 0.5);
+          background: rgba(59, 130, 246, 0.1);
+          color: white;
+          transform: translateX(5px);
         }
 
         .nav-link.active {
-          background: rgba(255, 255, 255, 0.2);
-          border-left-color: white;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.1));
+          color: white;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .active-indicator {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 20px;
+          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          border-radius: 0 3px 3px 0;
         }
 
         .nav-icon {
           flex-shrink: 0;
+          transition: all 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+          transform: scale(1.1);
         }
 
         .nav-label {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           font-weight: 500;
-          opacity: 0.95;
+          transition: all 0.3s ease;
         }
 
         .sidebar-footer {
           padding: 1rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-top: 1px solid rgba(148, 163, 184, 0.1);
           margin-top: auto;
+          background: rgba(30, 41, 59, 0.5);
         }
 
         .logout-btn {
@@ -347,20 +404,22 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           align-items: center;
           gap: 0.75rem;
           width: 100%;
-          padding: 0.875rem 1rem;
-          background: rgba(255, 255, 255, 0.1);
-          border: none;
-          border-radius: 8px;
-          color: white;
+          padding: 0.75rem 1rem;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 10px;
+          color: #fca5a5;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           font-weight: 500;
         }
 
         .logout-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(239, 68, 68, 0.2);
+          color: #fecaca;
           transform: translateY(-1px);
+          box-shadow: 0 3px 12px rgba(239, 68, 68, 0.2);
         }
 
         .collapsed .nav-label,
@@ -374,10 +433,26 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           justify-content: center;
           padding-left: 0;
           padding-right: 0;
+          margin-right: 0;
+          border-radius: 0;
         }
 
         .collapsed .user-info {
           justify-content: center;
+        }
+
+        .collapsed .sidebar-logo {
+          padding: 1rem;
+        }
+
+        .collapsed .logo-container {
+          width: 40px;
+          height: 40px;
+        }
+
+        .collapsed .logo-img {
+          width: 24px;
+          height: 24px;
         }
 
         /* Mobile Styles */
@@ -396,7 +471,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
 
           .sidebar {
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
 
           .sidebar.mobile-open {
@@ -404,7 +479,7 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           }
 
           .sidebar.collapsed {
-            width: 280px;
+            width: 260px;
           }
 
           .collapsed .nav-label,
@@ -416,25 +491,35 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
           .collapsed .nav-link,
           .collapsed .logout-btn {
             justify-content: flex-start;
-            padding: 0.875rem 1rem;
+            padding: 0.75rem 1rem;
+            margin-right: 0.75rem;
+            border-radius: 0 20px 20px 0;
           }
 
           .collapsed .user-info {
             justify-content: flex-start;
+          }
+
+          .collapsed .sidebar-logo {
+            padding: 1.25rem;
           }
         }
 
         /* Tablet Styles */
         @media (min-width: 769px) and (max-width: 1024px) {
           .sidebar {
-            width: 250px;
+            width: 240px;
+          }
+
+          .mobile-menu-toggle {
+            display: none;
           }
         }
 
         /* Large Desktop Styles */
         @media (min-width: 1200px) {
           .sidebar {
-            width: 320px;
+            width: 280px;
           }
         }
 
@@ -444,17 +529,41 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
         }
 
         .sidebar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(148, 163, 184, 0.1);
+          border-radius: 2px;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(148, 163, 184, 0.3);
           border-radius: 2px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.5);
+          background: rgba(148, 163, 184, 0.5);
         }
+
+        /* Animations */
+        @keyframes slideIn {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .nav-item {
+          animation: slideIn 0.3s ease forwards;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.05s; }
+        .nav-item:nth-child(2) { animation-delay: 0.1s; }
+        .nav-item:nth-child(3) { animation-delay: 0.15s; }
+        .nav-item:nth-child(4) { animation-delay: 0.2s; }
+        .nav-item:nth-child(5) { animation-delay: 0.25s; }
+        .nav-item:nth-child(6) { animation-delay: 0.3s; }
       `}</style>
     </>
   );
