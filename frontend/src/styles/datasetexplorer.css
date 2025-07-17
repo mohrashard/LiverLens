@@ -283,7 +283,20 @@ section:nth-child(5) { animation-delay: 0.4s; }
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   justify-content: flex-end;
 }
+.filter-select option {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  padding: 8px;
+}
 
+.filter-select option:hover {
+  background-color: #3a3a3a;
+}
+
+.filter-select option:checked {
+  background-color: #4a4a4a;
+  color: #ffffff;
+}
 .reset-btn,
 .export-btn {
   display: flex;
