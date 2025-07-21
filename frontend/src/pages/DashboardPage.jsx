@@ -123,7 +123,6 @@ const StatCard = ({ icon, title, value, description, color = '#6366f1', trend })
   );
 };
 
-
 // Enhanced RiskBadge Component
 const RiskBadge = ({ riskLevel }) => {
   const getRiskConfig = () => {
@@ -361,8 +360,8 @@ const RecentPredictionsTable = ({
   );
 };
 
-// Enhanced PatientChartSection Component
-const PatientChartSection = ({ predictions }) => {
+// Enhanced PatientChartSection Component with Close Button
+const PatientChartSection = ({ predictions, onClose }) => {
   if (!predictions || predictions.length === 0) {
     return (
       <div className="empty-chart-state">
@@ -392,6 +391,13 @@ const PatientChartSection = ({ predictions }) => {
           <TrendingUp size={20} />
           Patient Prediction History
         </h2>
+        <button 
+          className="close-chart-btn" 
+          onClick={onClose}
+          title="Close charts"
+        >
+          ✕
+        </button>
       </div>
       <div className="charts-grid">
         <div className="chart-card">
@@ -663,6 +669,12 @@ const DashboardPage = () => {
     }
   };
 
+  const handleCloseCharts = () => {
+    setSelectedPatient(null);
+    setPatientPredictions([]);
+    setPatientError("");
+  };
+
   const handleViewAll = () => {
     console.log("Navigate to history page");
   };
@@ -719,7 +731,6 @@ const DashboardPage = () => {
                   value={dashboardData.stats.total_predictions || 0}
                   description="Predictions made to date"
                   color="#3B82F6"
-         
                 />
                 <StatCard
                   icon={<Activity size={24} />}
@@ -749,8 +760,7 @@ const DashboardPage = () => {
                   }
                 />
                 <StatCard
-                 icon={<User size={24} color="white" />}
-
+                  icon={<User size={24} color="white" />}
                   title="Account Created"
                   value={
                     user?.created_at
@@ -789,7 +799,10 @@ const DashboardPage = () => {
                           <p>{patientError}</p>
                         </div>
                       ) : (
-                        <PatientChartSection predictions={patientPredictions} />
+                        <PatientChartSection 
+                          predictions={patientPredictions} 
+                          onClose={handleCloseCharts}
+                        />
                       )}
                     </div>
                   )}
