@@ -381,12 +381,18 @@ def delete_prediction(prediction_id):
 def get_history():
     try:
         user_id = session['user_id']
+        patient_id = request.args.get('patient_id')  # Get patient_id from query params
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         skip = (page - 1) * per_page
         
-        total_count = predictions_collection.count_documents({'user_id': user_id})
-        predictions = list(predictions_collection.find({'user_id': user_id})
+        # Build query with patient_id filter
+        query = {'user_id': user_id}
+        if patient_id:
+            query['input_data.Patient_ID'] = patient_id
+        
+        total_count = predictions_collection.count_documents(query)
+        predictions = list(predictions_collection.find(query)
                           .sort('timestamp', -1).skip(skip).limit(per_page))
         
         for prediction in predictions:
@@ -406,6 +412,7 @@ def get_history():
     except Exception as e:
         logger.error(f"History retrieval error: {e}")
         return jsonify({'error': 'Failed to retrieve prediction history'}), 500
+
 
 @app.route('/history/bulk-delete', methods=['DELETE'])
 @login_required

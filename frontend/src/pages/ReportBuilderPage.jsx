@@ -123,36 +123,36 @@ const ReportBuilderPage = () => {
     );
   }
 
-  const fetchPatientPredictions = async () => {
-    if (!patientId) return;
+const fetchPatientPredictions = async () => {
+  if (!patientId) return;
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const response = await axios.get(
-        `http://localhost:5001/history?patient_id=${patientId}&server_pagination=false`,
-        { withCredentials: true }
-      );
+  try {
+    const response = await axios.get(
+      `http://localhost:5001/history?patient_id=${patientId}&server_pagination=false`,
+      { withCredentials: true }
+    );
 
-      if (response.data.predictions.length === 0) {
-        setError("No predictions found for this patient ID");
-        return;
-      }
-
-      const sortedPredictions = [...response.data.predictions].sort(
-        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-      );
-
-      setPredictions(sortedPredictions);
-      setLatestPrediction(sortedPredictions[0]);
-    } catch (err) {
-      console.error("Error fetching predictions:", err);
-      setError(err.response?.data?.error || "Failed to fetch patient data");
-    } finally {
-      setLoading(false);
+    if (response.data.predictions.length === 0) {
+      setError("No predictions found for this patient ID");
+      return;
     }
-  };
+
+    const sortedPredictions = [...response.data.predictions].sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+
+    setPredictions(sortedPredictions);
+    setLatestPrediction(sortedPredictions[0]);
+  } catch (err) {
+    console.error("Error fetching predictions:", err);
+    setError(err.response?.data?.error || "Failed to fetch patient data");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSearch = (e) => {
     e.preventDefault();
