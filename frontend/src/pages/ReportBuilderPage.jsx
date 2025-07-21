@@ -8,7 +8,6 @@ import {
   FileText,
   User,
   ClipboardEdit,
-  Download,
   AlertCircle,
   CheckCircle,
   Loader,
@@ -25,14 +24,11 @@ import {
   AlertTriangle,
   Info,
   CheckCircle2,
-  XCircle,
   Eye,
   FileDown,
   X
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -40,15 +36,7 @@ import {
   Legend,
   ResponsiveContainer,
   AreaChart,
-  Area,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  BarChart,
-  Bar,
-  Cell
+  Area
 } from "recharts";
 
 const ReportBuilderPage = () => {
