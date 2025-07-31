@@ -1,4 +1,4 @@
-# register.py
+
 import os
 from flask import Flask, request, jsonify, session, make_response
 from pymongo import MongoClient
@@ -8,23 +8,23 @@ from datetime import datetime
 from dotenv import load_dotenv
 from bson import ObjectId
 
-# Load environment variables
+
 load_dotenv()
 
-# Initialize Flask app
+
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key')
 
-# MongoDB connection
+
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
 client = MongoClient(MONGO_URI)
 db = client["liverlens_db"]
 users_collection = db["users"]
 
-# Create unique index on email field
+
 users_collection.create_index("email", unique=True)
 
-# CORS middleware
+
 @app.after_request
 def add_cors_headers(response):
     allowed_origin = os.getenv('CORS_ALLOWED_ORIGIN', 'http://localhost:3000')
@@ -34,7 +34,7 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
 
-# Handle OPTIONS requests
+
 @app.route('/register', methods=['OPTIONS'])
 @app.route('/login', methods=['OPTIONS'])
 @app.route('/logout', methods=['OPTIONS'])
