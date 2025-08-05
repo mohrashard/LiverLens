@@ -127,36 +127,29 @@ def validate_input_data(data):
 
 def preprocess_input(data):
     try:
-        processed_data = data.copy()
-        
+        processed_data = data.copy()        
         for key in processed_data:
             if processed_data[key] in [None, '', 'null']:
-                processed_data[key] = np.nan
-        
+                processed_data[key] = np.nan        
         numerical_features = [
             'N_Days', 'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper',
             'Alk_Phos', 'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin', 'Stage'
-        ]
-        
+        ]        
         for feature in numerical_features:
             if feature in processed_data:
                 try:
                     processed_data[feature] = float(processed_data[feature])
                 except (ValueError, TypeError):
-                    processed_data[feature] = np.nan
-        
+                    processed_data[feature] = np.nan        
         categorical_features = ['Drug', 'Sex', 'Ascites', 'Hepatomegaly', 'Spiders', 'Edema']
         for feature in categorical_features:
             if feature in processed_data and processed_data[feature] not in [None, '', 'null']:
                 processed_data[feature] = str(processed_data[feature]).upper()[0]
             else:
-                processed_data[feature] = 'N'
-        
-        df = pd.DataFrame([processed_data])
-        
+                processed_data[feature] = 'N'        
+        df = pd.DataFrame([processed_data])        
         imputer = preprocessing_components['imputer']
-        df[numerical_features] = imputer.transform(df[numerical_features])
-        
+        df[numerical_features] = imputer.transform(df[numerical_features])        
         categorical_encoders = preprocessing_components.get('categorical_encoders', {})
         for feature in categorical_features:
             if feature in categorical_encoders and feature in df.columns:
@@ -164,13 +157,12 @@ def preprocess_input(data):
                 try:
                     df[feature] = encoder.transform(df[feature].astype(str))
                 except ValueError:
-                    df[feature] = encoder.transform([encoder.classes_[0]])[0]
-        
+                    df[feature] = encoder.transform([encoder.classes_[0]])[0] 
+
         feature_names = preprocessing_components['feature_names']
         for feature in feature_names:
             if feature not in df.columns:
-                df[feature] = 0
-        
+                df[feature] = 0        
         df = df[feature_names]
         logger.info(f"Preprocessed data shape: {df.shape}")
         return df
@@ -192,20 +184,17 @@ def get_risk_level(status):
 
 def make_prediction(data):
     try:
-        logger.info("Starting prediction process")
-        
+        logger.info("Starting prediction process")        
         data.setdefault('Ascites', 'N')
         data.setdefault('Hepatomegaly', 'N')
         data.setdefault('Spiders', 'N')
         data.setdefault('Edema', 'N')
         data.setdefault('Drug', 'Placebo')
-        data.setdefault('Tryglicerides', 100)
-        
+        data.setdefault('Tryglicerides', 100)        
         is_valid, message = validate_input_data(data)
         if not is_valid:
             logger.error(f"Input validation failed: {message}")
-            return None, message
-        
+            return None, message        
         processed_data = preprocess_input(data)
         probabilities = model.predict_proba(processed_data)[0]
         predicted_class_idx = np.argmax(probabilities)
@@ -381,12 +370,12 @@ def delete_prediction(prediction_id):
 def get_history():
     try:
         user_id = session['user_id']
-        patient_id = request.args.get('patient_id')  # Get patient_id from query params
+        patient_id = request.args.get('patient_id')  
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         skip = (page - 1) * per_page
         
-        # Build query with patient_id filter
+       
         query = {'user_id': user_id}
         if patient_id:
             query['input_data.Patient_ID'] = patient_id
@@ -459,7 +448,7 @@ def get_analysis_summary():
         return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
     
     try:
-        # Aggregate pipeline for summary statistics
+     
         pipeline = [
             {
                 '$group': {
@@ -511,7 +500,7 @@ def get_analysis_summary():
         summary = result[0]
         summary.pop('_id', None)
         
-        # Handle null values
+    
         for key, value in summary.items():
             if value is None:
                 summary[key] = 0
@@ -527,10 +516,8 @@ def get_analysis_summary():
 def get_prediction_outcomes():
     """Get prediction outcome distribution"""
     if session.get('role') != 'Researcher':
-        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
-    
-    try:
-        # Count predictions by status
+        return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403    
+    try:       
         pipeline = [
             {
                 '$group': {
@@ -538,17 +525,11 @@ def get_prediction_outcomes():
                     'count': {'$sum': 1}
                 }
             }
-        ]
-        
-        results = list(predictions_collection.aggregate(pipeline))
-        
-        # Calculate total for percentages
-        total = sum(result['count'] for result in results)
-        
+        ]        
+        results = list(predictions_collection.aggregate(pipeline))       
+        total = sum(result['count'] for result in results)        
         if total == 0:
-            return jsonify([]), 200
-        
-        # Format results
+            return jsonify([]), 200        
         outcomes = []
         for result in results:
             status = result['_id'] if result['_id'] else 'Unknown'
@@ -556,11 +537,8 @@ def get_prediction_outcomes():
                 'status': status,
                 'count': result['count'],
                 'percentage': (result['count'] / total) * 100
-            })
-        
-        # Sort by count descending
-        outcomes.sort(key=lambda x: x['count'], reverse=True)
-        
+            })      
+        outcomes.sort(key=lambda x: x['count'], reverse=True)       
         return jsonify(outcomes), 200
         
     except Exception as e:
@@ -774,13 +752,13 @@ def get_temporal_trends():
         return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
     
     try:
-        # Get predictions with timestamps
+     
         predictions = list(predictions_collection.find({}, {'timestamp': 1}))
         
         if not predictions:
             return jsonify([]), 200
         
-        # Group by date
+     
         date_counts = defaultdict(int)
         
         for pred in predictions:
@@ -788,7 +766,7 @@ def get_temporal_trends():
             if timestamp:
                 try:
                     if isinstance(timestamp, str):
-                        # Parse string timestamp
+                     
                         timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
                     date_str = timestamp.strftime('%Y-%m-%d')
                     date_counts[date_str] += 1
@@ -796,7 +774,7 @@ def get_temporal_trends():
                     logger.warning(f"Invalid timestamp format: {timestamp}, error: {e}")
                     continue
         
-        # Convert to list and sort by date
+       
         trends = [
             {'date': date, 'count': count}
             for date, count in date_counts.items()
@@ -818,7 +796,7 @@ def get_subgroup_comparison():
         return jsonify({'error': 'Access denied. Restricted to researchers.'}), 403
     
     try:
-        # Get all predictions
+       
         predictions = list(predictions_collection.find({}, {'input_data': 1, 'risk_level': 1}))
         
         if not predictions:
@@ -826,7 +804,7 @@ def get_subgroup_comparison():
         
         comparisons = {}
         
-        # Helper function to safely get numeric value
+     
         def safe_float(value):
             if value is None:
                 return None
@@ -834,8 +812,7 @@ def get_subgroup_comparison():
                 return float(value)
             except (ValueError, TypeError):
                 return None
-        
-        # Helper function to calculate group statistics
+    
         def calculate_group_stats(group_preds):
             if not group_preds:
                 return {
@@ -861,7 +838,7 @@ def get_subgroup_comparison():
                 'avg_albumin': float(np.mean(albumins)) if albumins else None
             }
         
-        # Gender comparison
+
         gender_groups = {'Male': [], 'Female': []}
         for pred in predictions:
             sex = pred.get('input_data', {}).get('Sex', 'M')
@@ -876,7 +853,7 @@ def get_subgroup_comparison():
         for group, group_preds in gender_groups.items():
             comparisons['gender'][group] = calculate_group_stats(group_preds)
         
-        # Risk level comparison
+        
         risk_groups = {'Low': [], 'Medium': [], 'High': []}
         for pred in predictions:
             risk = pred.get('risk_level', 'Low')
@@ -887,7 +864,7 @@ def get_subgroup_comparison():
         for group, group_preds in risk_groups.items():
             comparisons['risk_level'][group] = calculate_group_stats(group_preds)
         
-        # Age group comparison
+     
         age_groups = {'Under_50': [], 'Over_50': []}
         for pred in predictions:
             age = safe_float(pred.get('input_data', {}).get('Age'))
@@ -899,7 +876,7 @@ def get_subgroup_comparison():
         for group, group_preds in age_groups.items():
             comparisons['age_group'][group] = calculate_group_stats(group_preds)
         
-        # Stage comparison
+     
         stage_groups = {'Stage_1': [], 'Stage_2': [], 'Stage_3': [], 'Stage_4': []}
         for pred in predictions:
             stage = safe_float(pred.get('input_data', {}).get('Stage'))
@@ -909,10 +886,10 @@ def get_subgroup_comparison():
         
         comparisons['stage'] = {}
         for group, group_preds in stage_groups.items():
-            if group_preds:  # Only include non-empty groups
+            if group_preds:  
                 comparisons['stage'][group] = calculate_group_stats(group_preds)
         
-        # Drug comparison
+       
         drug_groups = defaultdict(list)
         for pred in predictions:
             drug = pred.get('input_data', {}).get('Drug', 'Unknown')
@@ -921,7 +898,7 @@ def get_subgroup_comparison():
         
         comparisons['drug'] = {}
         for group, group_preds in drug_groups.items():
-            if len(group_preds) >= 5:  # Only include groups with at least 5 predictions
+            if len(group_preds) >= 5: 
                 comparisons['drug'][group] = calculate_group_stats(group_preds)
         
         return jsonify(comparisons), 200

@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data); // Fix: Use data directly, not data.user
+        setUser(data); 
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setUser(data.user); // Login response has 'user' key
+        setUser(data.user); 
         setIsAuthenticated(true);
         return { 
           success: true, 

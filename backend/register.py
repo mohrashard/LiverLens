@@ -52,17 +52,13 @@ def validate_password(password):
     - Contains at least one special character
     """
     if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-    
+        return False, "Password must be at least 8 characters long"    
     if not re.search(r'[A-Z]', password):
-        return False, "Password must contain at least one uppercase letter"
-    
+        return False, "Password must contain at least one uppercase letter"    
     if not re.search(r'[a-z]', password):
-        return False, "Password must contain at least one lowercase letter"
-    
+        return False, "Password must contain at least one lowercase letter"    
     if not re.search(r'[0-9]', password):
-        return False, "Password must contain at least one digit"
-    
+        return False, "Password must contain at least one digit"    
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
         return False, "Password must contain at least one special character"
     
@@ -78,7 +74,7 @@ def validate_role(role):
     valid_roles = ['Doctor', 'Researcher', 'Student']
     return role in valid_roles
 
-# Health check endpoint
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({
@@ -87,7 +83,7 @@ def health_check():
         'timestamp': datetime.utcnow().isoformat()
     }), 200
 
-# Root endpoint
+
 @app.route('/')
 def home():
     return jsonify({
@@ -105,52 +101,36 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register():
-    try:
-        # Get data from request
+    try:   
         data = request.get_json() if request.is_json else request.form.to_dict()
-        
-        # Extract required fields
         full_name = data.get('full_name', '').strip()
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
         confirm_password = data.get('confirm_password', '')
         role = data.get('role', '').strip()
-        
-        # Validate required fields
+             
         if not full_name:
-            return jsonify({'error': 'Full name is required'}), 400
-        
+            return jsonify({'error': 'Full name is required'}), 400       
         if not email:
-            return jsonify({'error': 'Email is required'}), 400
-        
+            return jsonify({'error': 'Email is required'}), 400        
         if not password:
-            return jsonify({'error': 'Password is required'}), 400
-        
+            return jsonify({'error': 'Password is required'}), 400        
         if not confirm_password:
-            return jsonify({'error': 'Password confirmation is required'}), 400
-        
+            return jsonify({'error': 'Password confirmation is required'}), 400        
         if not role:
             return jsonify({'error': 'User role is required'}), 400
-        
-        # Validate field formats
         if not validate_email(email):
-            return jsonify({'error': 'Invalid email format'}), 400
-        
+            return jsonify({'error': 'Invalid email format'}), 400        
         if not validate_role(role):
-            return jsonify({'error': 'Invalid user role'}), 400
-        
+            return jsonify({'error': 'Invalid user role'}), 400        
         if password != confirm_password:
-            return jsonify({'error': 'Passwords do not match'}), 400
-        
+            return jsonify({'error': 'Passwords do not match'}), 400        
         is_valid, message = validate_password(password)
         if not is_valid:
             return jsonify({'error': message}), 400
-        
-        # Check for existing user
         if users_collection.find_one({'email': email}):
             return jsonify({'error': 'Email is already registered'}), 409
         
-        # Prepare user document
         user_doc = {
             'full_name': full_name,
             'email': email,
@@ -160,8 +140,6 @@ def register():
             'updated_at': datetime.utcnow(),
             'last_login': None
         }
-        
-        # Add role-specific fields
         if role == 'Doctor':
             user_doc['doctor_info'] = {
                 'medical_license_id': data.get('medical_license_id', '').strip(),
@@ -175,16 +153,12 @@ def register():
                 'department': data.get('department', '').strip(),
                 'role_title': data.get('role_title', '').strip()
             }
-        
-        # Insert into database
         result = users_collection.insert_one(user_doc)
-        
         return jsonify({
             'success': True,
             'message': 'User registered successfully',
             'user_id': str(result.inserted_id)
-        }), 201
-        
+        }), 201        
     except Exception as e:
         if 'duplicate key error' in str(e).lower():
             return jsonify({'error': 'Email is already registered'}), 409
@@ -196,26 +170,19 @@ def login():
     try:
         data = request.get_json() if request.is_json else request.form.to_dict()
         email = data.get('email', '').strip().lower()
-        password = data.get('password', '')
-        
+        password = data.get('password', '')       
         if not email or not password:
-            return jsonify({'error': 'Email and password are required'}), 400
-        
+            return jsonify({'error': 'Email and password are required'}), 400        
         user = users_collection.find_one({'email': email})
         if not user or not check_password_hash(user['password_hash'], password):
             return jsonify({'error': 'Invalid email or password'}), 401
-        
-        # Update session
         session['user_id'] = str(user['_id'])
         session['email'] = user['email']
         session['role'] = user['role']
-        
-        # Update last login
         users_collection.update_one(
             {'_id': user['_id']},
             {'$set': {'last_login': datetime.utcnow()}}
-        )
-        
+        )        
         response_data = {
             'success': True,
             'message': 'Login successful',
@@ -227,15 +194,12 @@ def login():
                 'created_at': user.get('created_at').isoformat() if user.get('created_at') else None,
                 'last_login': user.get('last_login').isoformat() if user.get('last_login') else None
             }
-        }
-        
+        }               
         if user['role'] == 'Doctor' and 'doctor_info' in user:
             response_data['user']['doctor_info'] = user['doctor_info']
         elif user['role'] in ['Researcher', 'Student'] and 'academic_info' in user:
-            response_data['user']['academic_info'] = user['academic_info']
-        
-        return jsonify(response_data), 200
-        
+            response_data['user']['academic_info'] = user['academic_info']        
+        return jsonify(response_data), 200        
     except Exception as e:
         app.logger.error(f'Login error: {str(e)}')
         return jsonify({'error': 'Login failed. Please try again.'}), 500
@@ -268,8 +232,6 @@ def get_profile():
             'created_at': user.get('created_at').isoformat() if user.get('created_at') else None,
             'last_login': user.get('last_login').isoformat() if user.get('last_login') else None
         }
-        
-        # Add role-specific info
         if user['role'] == 'Doctor' and 'doctor_info' in user:
             profile_data['doctor_info'] = user['doctor_info']
         elif user['role'] in ['Researcher', 'Student'] and 'academic_info' in user:

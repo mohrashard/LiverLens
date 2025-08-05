@@ -79,7 +79,7 @@ const PredictPage = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/LoginPage" replace />;
   }
 
   const handleInputChange = (e) => {

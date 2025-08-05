@@ -47,7 +47,6 @@ const Sidebar = ({ userRole = 'Doctor', onLogout }) => {
     ],
   };
 
-  // Combine universal and role-specific items
   const navigationItems = [
     ...universalItems,
     ...(roleSpecificItems[userRole] || []),
