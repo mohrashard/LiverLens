@@ -1,4 +1,3 @@
-````markdown
 # 🩺 Liver Disease Risk Prediction System
 
 ## 🌟 Project Overview
@@ -10,7 +9,7 @@ This is a comprehensive web application designed to predict liver disease risk u
 ## ✨ Features
 
 ### 🌐 Universal Features (Available to All Users)
-- **🔐 User Authentication:** Secure registration and login system with role-based access control (Doctor, Researcher, Student) using JWT. The backend uses the `werkzeug.security` module for password hashing and validation.
+- **🔐 User Authentication:** Secure registration and login system with role-based access control (Doctor, Researcher, Student) using a secret key. The backend uses the `werkzeug.security` module for password hashing and validation.
 - **🏠 Dashboard:** A personalized landing page displaying a greeting, user statistics, last login date, and recent predictions.
 - **🔍 Prediction History:** A searchable and filterable view of all past predictions made by the user.
 - **🧭 Sidebar Navigation:** A clean, reusable, and role-aware sidebar with distinct icons for each section.
@@ -57,12 +56,12 @@ This is a comprehensive web application designed to predict liver disease risk u
 
 ## 🛠️ Technology Stack
 
-- **Frontend:** React, Normal CSS
-- **Backend:** Flask, Python
-- **Database:** MongoDB
-- **Machine Learning:** XGBoost (version 3.0.2), scikit-learn
-- **Authentication:** JWT (JSON Web Tokens)
-- **Deployment:** The model and preprocessing components are loaded at backend startup using `joblib`.
+- **Frontend:** React, Normal CSS  
+- **Backend:** Flask, Python  
+- **Database:** MongoDB  
+- **Machine Learning:** XGBoost (version 3.0.2), scikit-learn  
+- **Authentication:** Role-based authentication using a Flask `SECRET_KEY` for session management  
+- **Deployment:** The model and preprocessing components are loaded at backend startup using `joblib`  
 
 ---
 
@@ -98,7 +97,7 @@ The system uses MongoDB to store data in separate collections for modularity and
    ```bash
    git clone <repository_url>
    cd <repository_name>
-````
+```
 
 2.  **Backend Setup:**
 
@@ -141,6 +140,3 @@ The system uses MongoDB to store data in separate collections for modularity and
 ## ✍️ Contribution
 
 Details on how to contribute will be added here.
-
-```
-```
