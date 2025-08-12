@@ -185,14 +185,14 @@ graph TB
 
 3. **⚙️ Environment Configuration**
    ```bash
-   # Create .env file
+   # Create .env file in the backend directory
    MONGO_URI=mongodb://localhost:27017/liverlens
    SECRET_KEY=your-secret-key-here
    ```
 
 4. **⚛️ Frontend Setup**
    ```bash
-   cd frontend
+   cd ../frontend
    npm install
    ```
 
@@ -208,23 +208,32 @@ graph TB
 
 </div>
 
----
+**Step-by-step execution:**
 
-## 🎨 **User Interface Preview**
+1. **Start MongoDB** (ensure it's running on port 27017)
+   ```bash
+   mongod
+   ```
 
-<details>
-<summary>🖼️ <strong>View Screenshots</strong></summary>
+2. **Start Authentication Backend** (Terminal 1)
+   ```bash
+   cd backend
+   python register.py
+   ```
 
-### Dashboard
-![Dashboard Preview](https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=Dashboard+Preview)
+3. **Start Prediction Backend** (Terminal 2)
+   ```bash
+   cd backend
+   python prediction.py
+   ```
 
-### Prediction Interface  
-![Prediction Interface](https://via.placeholder.com/800x400/7ED321/FFFFFF?text=Prediction+Interface)
+4. **Start Frontend** (Terminal 3)
+   ```bash
+   cd frontend
+   npm start
+   ```
 
-### Analytics Dashboard
-![Analytics Dashboard](https://via.placeholder.com/800x400/F5A623/FFFFFF?text=Analytics+Dashboard)
-
-</details>
+5. **Access the application** at `http://localhost:3000`
 
 ---
 
@@ -275,19 +284,6 @@ GET  /analytics        # Data analytics
 
 We welcome contributions from the community! Here's how you can help:
 
-<div align="center">
-
-### 🌟 **Ways to Contribute**
-
-| Type | Description | Getting Started |
-|------|-------------|----------------|
-| 🐛 **Bug Reports** | Found an issue? Let us know! | [Open an Issue](../../issues) |
-| ✨ **Feature Requests** | Have an idea? Share it! | [Request Feature](../../issues) |
-| 💻 **Code Contributions** | Want to code? Great! | [Fork & PR](../../pulls) |
-| 📚 **Documentation** | Improve our docs | [Edit & Submit](../../pulls) |
-
-</div>
-
 ### 📝 **Development Workflow**
 
 1. 🍴 Fork the repository
@@ -296,17 +292,26 @@ We welcome contributions from the community! Here's how you can help:
 4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
 5. 🔄 Open a Pull Request
 
+### 🐛 **Bug Reports**
+
+If you find a bug, please create an issue with:
+- Clear description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Screenshots (if applicable)
+
+### 💡 **Feature Requests**
+
+We're always looking to improve! Submit feature requests with:
+- Clear description of the proposed feature
+- Use case and benefits
+- Possible implementation approach
+
 ---
 
 ## 📄 **License**
 
-<div align="center">
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-
-</div>
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -333,8 +338,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-**Made with ❤️ by the LiverLens Team**
-
-[🏠 Homepage](https://github.com/mohrashard/LiverLens) • [📚 Docs](https://github.com/mohrashard/LiverLens/wiki) • [🐛 Issues](https://github.com/mohrashard/LiverLens/issues) • [💬 Discussions](https://github.com/mohrashard/LiverLens/discussions)
+**Made with ❤️ by Mohamed Rashard**
 
 </div>
