@@ -1,153 +1,340 @@
-# 🩺 Liver Disease Risk Prediction System
+# 🩺 LiverLens - AI-Powered Liver Disease Risk Prediction
 
-## 🌟 Project Overview
-
-This is a comprehensive web application designed to predict liver disease risk using machine learning, catering to different user roles: Doctors, Researchers, and Students. The system provides a personalized dashboard, real-time predictions, data analysis tools, and educational resources, all within a secure, role-based access control framework.
-
----
-
-## ✨ Features
-
-### 🌐 Universal Features (Available to All Users)
-- **🔐 User Authentication:** Secure registration and login system with role-based access control (Doctor, Researcher, Student) using a secret key. The backend uses the `werkzeug.security` module for password hashing and validation.
-- **🏠 Dashboard:** A personalized landing page displaying a greeting, user statistics, last login date, and recent predictions.
-- **🔍 Prediction History:** A searchable and filterable view of all past predictions made by the user.
-- **🧭 Sidebar Navigation:** A clean, reusable, and role-aware sidebar with distinct icons for each section.
-- **🔄 Profile Page:** A dedicated page to view and manage personal details such as name, email, role, join date, and last login.
-- **🎨 Responsive UI:** A professional medical-themed user interface built with React and standard CSS, ensuring a seamless experience across all devices.
-- **🤖 Prediction Page:** An interface for users to input patient data and receive an instant **High/Low Risk** prediction result in real time. The `predict.jsx` component handles form inputs and API calls.
-
-### 🩺 Doctor Features
-- **💉 Predict Liver Disease Risk:** Input clinical data for instant AI-powered risk prediction.
-- **📤 Upload CSV for Bulk Prediction:** Upload a CSV file to perform predictions for multiple patients at once, improving clinical workflow efficiency.
-- **📄 Report Builder:** Generate a detailed PDF report for any patient by entering their unique ID, which pulls data directly from the database.
-- **🧾 Doctor’s Notes:** Add personal observations and notes directly to patient reports to enhance the clinical context.
-- **📥 Downloadable Reports:** Export generated reports as printable PDF files.
-
-### 🧪 Researcher Features
-- **📂 Dataset Explorer:** Browse and analyze anonymized patient data, including inputs, predictions, and timestamps, with advanced filtering options.
-- **🔎 Advanced Filtering:** Filter records by specific dates, data ranges, or risk levels.
-- **📊 Summary Stats Panel:** View overall statistical insights such as averages, counts, and percentages for the entire dataset.
-- **📈 Feature Distribution Charts:** Visualize the distribution of key clinical features (e.g., ALT, AST) across different patient groups.
-- **🔥 Correlation Heatmap:** An interactive heatmap to visualize the relationships between various clinical features.
-- **🧠 Feature Importance Analysis:** Understand which features the machine learning model considers most influential using SHAP/XGBoost visualizations.
-- **⏳ Temporal Trends Chart:** Track how patient features and risk predictions change over time.
-- **🧪 Subgroup Comparison Tool:** Compare statistics and trends across different demographic or patient subgroups.
-- **📥 Export Data and Charts:** Download filtered datasets or generated graphs for further analysis.
-- **🛡️ Researcher Access Control:** Restricted access to researcher-specific tools, available only to authenticated researcher accounts.
-
-### 🎓 Student Features
-- **📘 Learn Page:** A resource center with plain-language explanations of liver disease and its clinical features.
-- **🖼️ Visual Tab:** Annotated images and charts to help students understand complex clinical data.
-- **🤖 How the AI Works:** Explanations of the machine learning model's decision-making process.
-- **🧪 Case Study Explorer:** An interactive tool to work on simulated or real-world cases and practice making predictions.
-- **🎯 Quiz Generator:** Create custom quizzes based on saved notes or educational explanations.
-- **🛡️ Student Access Control:** Access to student-specific educational tools, available only to authenticated student accounts.
+<div align="center">
+  
+  ![LiverLens Logo](frontend/public/LiverenseLogo.png)
+  
+  ### 🚀 Advanced Machine Learning Platform for Liver Disease Risk Assessment
+  
+  [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+  [![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
+  [![Flask](https://img.shields.io/badge/Flask-2.0+-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+  [![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
+  [![XGBoost](https://img.shields.io/badge/XGBoost-3.0.2-FF6600?style=for-the-badge)](https://xgboost.readthedocs.io)
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
+  
+</div>
 
 ---
 
-## 🔒 Security & AI Features (Cross-Role)
-- **🔐 Role-Based Routing:** Both frontend and backend enforce strict access rules based on user roles, with role checks implemented in route handlers.
-- **🧠 XGBoost Model Integration:** The system uses a highly optimized XGBoost machine learning model for structured data prediction, chosen for its robustness with imbalanced data, high performance, and ability to handle missing values.
-- **📈 Confidence Scores:** Each prediction is accompanied by a probability score to indicate the model's confidence.
-- **⚖️ Feature Importance:** The model provides feature importance scores to display which features had the most significant influence on a given prediction.
+## 🌟 **Project Overview**
+
+**LiverLens** is a cutting-edge web application that leverages the power of machine learning to predict liver disease risk with **81.2% accuracy**. Designed with healthcare professionals in mind, it provides personalized dashboards, real-time predictions, and comprehensive data analysis tools within a secure, role-based access framework.
+
+<div align="center">
+  
+  ![LiverLens Dashboard](frontend/public/landing.png)
+  
+</div>
+
+### 🎯 **Key Highlights**
+
+- 🤖 **Advanced AI Model** - XGBoost with 0.865 ROC AUC score
+- 👥 **Multi-Role Support** - Doctors, Researchers, and Students
+- 📊 **Real-time Analytics** - Interactive charts and heatmaps
+- 🔒 **Enterprise Security** - Role-based access control
+- 📱 **Responsive Design** - Works seamlessly across all devices
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 **Features by Role**
 
-- **Frontend:** React, Normal CSS  
-- **Backend:** Flask, Python  
-- **Database:** MongoDB  
-- **Machine Learning:** XGBoost (version 3.0.2), scikit-learn  
-- **Authentication:** Role-based authentication using a Flask `SECRET_KEY` for session management  
-- **Deployment:** The model and preprocessing components are loaded at backend startup using `joblib`  
+<table>
+<tr>
+<td width="33%">
+
+### 🩺 **Doctor Features**
+- 🔍 **Instant Risk Prediction**
+- 📋 **Bulk CSV Upload**
+- 📄 **PDF Report Generation**
+- 📝 **Clinical Notes Integration**
+- 💾 **Downloadable Reports**
+
+</td>
+<td width="33%">
+
+### 🔬 **Researcher Features**
+- 📊 **Dataset Explorer**
+- 🔍 **Advanced Filtering**
+- 📈 **Feature Distribution**
+- 🔥 **Correlation Heatmap**
+- 🧠 **SHAP Analysis**
+- ⏳ **Temporal Trends**
+
+</td>
+<td width="33%">
+
+### 🎓 **Student Features**
+- 📚 **Interactive Learning**
+- 🖼️ **Visual Case Studies**
+- 🤖 **AI Model Explanations**
+- 🧪 **Practice Cases**
+- 🎯 **Custom Quizzes**
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🧠 Machine Learning Approach
+## 🛠️ **Technology Stack**
 
-The project involved a comprehensive exploratory data analysis (EDA) of a liver disease dataset from Kaggle. The XGBoost model was trained using StratifiedKFold cross-validation and its hyperparameters were tuned using RandomizedSearchCV to optimize for generalization and reduce log loss. The model was evaluated using several metrics, including:
+<div align="center">
 
-- **Accuracy:** 81.2%
-- **ROC AUC:** 0.865
-- **Log Loss:** 0.40
+### Frontend
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
-XGBoost was chosen over other models like Random Forest and Decision Tree due to its superior performance. The model's interpretability is enhanced using SHAP.
+### Backend
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
 
-## 📂 Data Storage
+### Database & ML
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-FF6600?style=for-the-badge&logoColor=white)
+![Scikit Learn](https://img.shields.io/badge/scikit_learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
 
-The system uses MongoDB to store data in separate collections for modularity and scalability.
-- **`users` collection:** Stores user profiles, hashed passwords, roles, and timestamps.
-- **`predictions` collection:** Manages prediction requests, storing unique IDs, input data, model predictions, confidence scores, risk levels, and timestamps.
+</div>
 
 ---
 
-## 🚀 Getting Started
+## 🧠 **Machine Learning Performance**
 
-### Prerequisites
+<div align="center">
 
-- **Python 3.x:** Ensure you have Python installed.
-- **Node.js & npm:** Required for the React frontend.
-- **MongoDB:** A running instance of MongoDB is needed for the database.
+| Metric | Score | Description |
+|--------|-------|-------------|
+| 🎯 **Accuracy** | **81.2%** | Overall prediction accuracy |
+| 📊 **ROC AUC** | **0.865** | Area under the curve |
+| 📉 **Log Loss** | **0.40** | Logarithmic loss |
 
-### Installation
+</div>
 
-1. **Clone the repository:**
+### 🔬 **Model Architecture**
+- **Algorithm**: XGBoost (eXtreme Gradient Boosting)
+- **Validation**: StratifiedKFold Cross-validation
+- **Optimization**: RandomizedSearchCV hyperparameter tuning
+- **Interpretability**: SHAP (SHapley Additive exPlanations)
+
+---
+
+## 📁 **System Architecture**
+
+```mermaid
+graph TB
+    A[👤 User Interface - React] --> B[🔐 Authentication Service - Flask:5000]
+    A --> C[🤖 Prediction Service - Flask:5001]
+    B --> D[📊 MongoDB - Users Collection]
+    C --> D
+    C --> E[🧠 XGBoost Model]
+    C --> F[📊 MongoDB - Predictions Collection]
+    
+    style A fill:#61DAFB,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#000000,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#000000,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#47A248,stroke:#333,stroke-width:2px,color:#fff
+    style E fill:#FF6600,stroke:#333,stroke-width:2px,color:#fff
+    style F fill:#47A248,stroke:#333,stroke-width:2px,color:#fff
+```
+
+---
+
+## 🚀 **Quick Start Guide**
+
+### 📋 **Prerequisites**
+
+<table>
+<tr>
+<td>
+
+**Required Software**
+- Python 3.8+
+- Node.js 16+
+- npm/yarn
+- MongoDB 4.4+
+
+</td>
+<td>
+
+**Development Tools**
+- Git
+- VS Code (recommended)
+- MongoDB Compass (optional)
+- Postman (for API testing)
+
+</td>
+</tr>
+</table>
+
+### ⚡ **Installation**
+
+1. **📂 Clone the Repository**
    ```bash
    git clone https://github.com/mohrashard/LiverLens.git
    cd LiverLens
    ```
 
-2. **Backend Setup:**
-
+2. **🐍 Backend Setup**
    ```bash
    cd backend
    pip install -r requirements.txt
    ```
 
-   - **Configure Environment Variables:** Create a `.env` file and add your MongoDB connection string, Flask `SECRET_KEY`, and any other necessary configuration.
-   - Backend has **two main files**:
-     - `register.py` → Handles authentication and user management (runs on port **5000**)
-     - `prediction.py` → Handles AI predictions (runs on port **5001**)
+3. **⚙️ Environment Configuration**
+   ```bash
+   # Create .env file
+   MONGO_URI=mongodb://localhost:27017/liverlens
+   SECRET_KEY=your-secret-key-here
+   ```
 
-3. **Frontend Setup:**
-
+4. **⚛️ Frontend Setup**
    ```bash
    cd frontend
    npm install
    ```
 
----
+### 🏃‍♂️ **Running the Application**
 
-### Running the Application
+<div align="center">
 
-1. **Start the Authentication Backend:**
+| Service | Command | Port | Status |
+|---------|---------|------|--------|
+| 🔐 **Auth Backend** | `python register.py` | 5000 | Required |
+| 🤖 **ML Backend** | `python prediction.py` | 5001 | Required |
+| ⚛️ **Frontend** | `npm start` | 3000 | Required |
 
-   ```bash
-   cd backend
-   python register.py
-   ```
-   - Runs on `http://localhost:5000`
-
-2. **Start the Prediction Backend:**
-
-   ```bash
-   cd backend
-   python prediction.py
-   ```
-   - Runs on `http://localhost:5001`
-
-3. **Start the Frontend:**
-
-   ```bash
-   cd frontend
-   npm start
-   ```
-   - Runs on `http://localhost:3000`
+</div>
 
 ---
 
-## ✍️ Contribution
+## 🎨 **User Interface Preview**
 
-Details on how to contribute will be added here.
+<details>
+<summary>🖼️ <strong>View Screenshots</strong></summary>
+
+### Dashboard
+![Dashboard Preview](https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=Dashboard+Preview)
+
+### Prediction Interface  
+![Prediction Interface](https://via.placeholder.com/800x400/7ED321/FFFFFF?text=Prediction+Interface)
+
+### Analytics Dashboard
+![Analytics Dashboard](https://via.placeholder.com/800x400/F5A623/FFFFFF?text=Analytics+Dashboard)
+
+</details>
+
+---
+
+## 🔒 **Security Features**
+
+<div align="center">
+
+| Feature | Implementation | Benefit |
+|---------|---------------|---------|
+| 🛡️ **Role-Based Access** | Flask-Session + MongoDB | Secure user management |
+| 🔐 **Password Hashing** | Werkzeug Security | Encrypted password storage |
+| 🔑 **Session Management** | Flask SECRET_KEY | Secure authentication |
+| 🚫 **Route Protection** | Decorator-based | Unauthorized access prevention |
+
+</div>
+
+---
+
+## 📊 **API Endpoints**
+
+<details>
+<summary>📡 <strong>Authentication API (Port 5000)</strong></summary>
+
+```http
+POST /register          # User registration
+POST /login            # User authentication  
+GET  /logout           # Session termination
+GET  /profile          # User profile data
+```
+
+</details>
+
+<details>
+<summary>🤖 <strong>Prediction API (Port 5001)</strong></summary>
+
+```http
+POST /predict          # Single prediction
+POST /bulk-predict     # Batch predictions
+GET  /history          # Prediction history
+GET  /analytics        # Data analytics
+```
+
+</details>
+
+---
+
+## 🤝 **Contributing**
+
+We welcome contributions from the community! Here's how you can help:
+
+<div align="center">
+
+### 🌟 **Ways to Contribute**
+
+| Type | Description | Getting Started |
+|------|-------------|----------------|
+| 🐛 **Bug Reports** | Found an issue? Let us know! | [Open an Issue](../../issues) |
+| ✨ **Feature Requests** | Have an idea? Share it! | [Request Feature](../../issues) |
+| 💻 **Code Contributions** | Want to code? Great! | [Fork & PR](../../pulls) |
+| 📚 **Documentation** | Improve our docs | [Edit & Submit](../../pulls) |
+
+</div>
+
+### 📝 **Development Workflow**
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. 💾 Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
+5. 🔄 Open a Pull Request
+
+---
+
+## 📄 **License**
+
+<div align="center">
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+</div>
+
+---
+
+## 🙏 **Acknowledgments**
+
+<div align="center">
+
+- 🤖 **XGBoost Team** for the incredible ML framework
+- 📊 **Kaggle Community** for the liver disease dataset  
+- ⚛️ **React Team** for the amazing frontend library
+- 🐍 **Flask Community** for the lightweight backend framework
+- 🍃 **MongoDB** for the flexible database solution
+
+</div>
+
+---
+
+<div align="center">
+
+### 🌟 **Star this repository if it helped you!**
+
+[![GitHub stars](https://img.shields.io/github/stars/mohrashard/LiverLens?style=social)](https://github.com/mohrashard/LiverLens/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mohrashard/LiverLens?style=social)](https://github.com/mohrashard/LiverLens/network)
+
+---
+
+**Made with ❤️ by the LiverLens Team**
+
+[🏠 Homepage](https://github.com/mohrashard/LiverLens) • [📚 Docs](https://github.com/mohrashard/LiverLens/wiki) • [🐛 Issues](https://github.com/mohrashard/LiverLens/issues) • [💬 Discussions](https://github.com/mohrashard/LiverLens/discussions)
+
+</div>
