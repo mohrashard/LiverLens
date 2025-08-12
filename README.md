@@ -95,47 +95,58 @@ The system uses MongoDB to store data in separate collections for modularity and
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository_url>
-   cd <repository_name>
-```
+   git clone https://github.com/mohrashard/LiverLens.git
+   cd LiverLens
+   ```
 
-2.  **Backend Setup:**
+2. **Backend Setup:**
 
-    ```bash
-    cd backend
-    pip install -r requirements.txt
-    ```
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-      - **Configure Environment Variables:** Create a `.env` file and add your MongoDB connection string, JWT secret key, and any other necessary configuration.
+   - **Configure Environment Variables:** Create a `.env` file and add your MongoDB connection string, Flask `SECRET_KEY`, and any other necessary configuration.
+   - Backend has **two main files**:
+     - `register.py` → Handles authentication and user management (runs on port **5000**)
+     - `prediction.py` → Handles AI predictions (runs on port **5001**)
 
-3.  **Frontend Setup:**
+3. **Frontend Setup:**
 
-    ```bash
-    cd frontend
-    npm install
-    ```
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+---
 
 ### Running the Application
 
-1.  **Start the Backend:**
+1. **Start the Authentication Backend:**
 
-    ```bash
-    cd backend
-    python app.py
-    ```
+   ```bash
+   cd backend
+   python register.py
+   ```
+   - Runs on `http://localhost:5000`
 
-      - The backend will run on `http://localhost:5000` (or the port you configure).
+2. **Start the Prediction Backend:**
 
-2.  **Start the Frontend:**
+   ```bash
+   cd backend
+   python prediction.py
+   ```
+   - Runs on `http://localhost:5001`
 
-    ```bash
-    cd frontend
-    npm start
-    ```
+3. **Start the Frontend:**
 
-      - The frontend will run on `http://localhost:3000`.
+   ```bash
+   cd frontend
+   npm start
+   ```
+   - Runs on `http://localhost:3000`
 
------
+---
 
 ## ✍️ Contribution
 
